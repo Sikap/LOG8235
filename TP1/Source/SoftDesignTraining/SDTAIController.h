@@ -16,8 +16,6 @@ class SOFTDESIGNTRAINING_API ASDTAIController : public AAIController
     GENERATED_BODY()
 public:
     virtual void Tick(float deltaTime) override;
-
-    virtual void OnPosses() override;
 private:
     FVector m_speed;
     FVector m_accel;
