@@ -17,8 +17,16 @@ class SOFTDESIGNTRAINING_API ASDTAIController : public AAIController
 public:
     virtual void Tick(float deltaTime) override;
 private:
-    FVector m_speed;
-    FVector m_accel;
 
-    float m_max_speed;
+    void WallAvoidance();
+    bool DeathFloorAvoidance();
+
+    FVector m_speed;
+    APawn* m_pawn;
+
+    float m_accel = 300;
+    float m_max_speed = 600;
+    float m_wall_cast = 350;
+    float m_side_cast = 200;
+    bool m_initialized = false;
 };
