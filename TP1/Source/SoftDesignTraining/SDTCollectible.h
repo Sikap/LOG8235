@@ -24,7 +24,7 @@ public:
     float m_CollectCooldownDuration = 10.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-        bool isMoveable = false;
+    bool isMoveable = false;
 
     virtual void Tick(float deltaTime) override;
     virtual void BeginPlay() override;

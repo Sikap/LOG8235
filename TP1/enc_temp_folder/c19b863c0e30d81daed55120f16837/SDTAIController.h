@@ -21,7 +21,6 @@ private:
     void WallAvoidance();
     bool DeathFloorAvoidance();
     void MoveTowardsPickup();
-    bool IsInsideCone(APawn* pawn, AActor* targetActor) const;
 
     FVector m_speed;
     APawn* m_pawn;

@@ -105,48 +105,14 @@ void ASDTAIController::MoveTowardsPickup() {
 	FVector endPos = startPos + GetPawn()->GetActorForwardVector() * m_side_cast;
 	FVector endPosDown = startPos + GetPawn()->GetActorForwardVector().RotateAngleAxis(10, GetPawn()->GetActorRightVector()) * m_side_cast;
 	
+	DrawDebugCone(GetWorld(), GetPawn()->GetActorLocation(), GetPawn()->GetActorForwardVector(), 500.f, PI / 3.0f, PI / 3.0f, 32, FColor::Blue);
 
-	TArray <FHitResult> hitData;
+	FHitResult hitData;
+	TArray<AActor*> actorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectsType;
 
-	FCollisionObjectQueryParams objectQueryParams; 
-	objectQueryParams.AddObjectTypesToQuery(COLLISION_COLLECTIBLE);
-	FCollisionShape collisionShape;     
-	collisionShape.SetSphere(m_Collectebale_detection_reduis);
-	FCollisionQueryParams queryParams = FCollisionQueryParams::DefaultQueryParam;     
-	queryParams.bReturnPhysicalMaterial = true;      
-	GetWorld()->SweepMultiByObjectType(hitData, endPos, endPos, FQuat::Identity, objectQueryParams, collisionShape, queryParams);
-	DrawDebugSphere(GetWorld(), endPos, 500, 32, FColor::Blue);
-	for (int i = 0; i < hitData.Num(); ++i) {
-		if (IsInsideCone(GetPawn(), hitData[i].GetActor())) 
-		{
+	UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), endPos, endPos, objectsType, false, actorsToIgnore, EDrawDebugTrace::None, hitData, false);
 
-		}
-	}
 
 }
 
-bool ASDTAIController::IsInsideCone(APawn* pawn, AActor* targetActor) const
-{
-	if (FVector::Dist2D(pawn->GetActorLocation(), targetActor->GetActorLocation()) > 500.f)
-	{
-		return false;
-	}
-
-	auto pawnForwardVector = pawn->GetActorForwardVector();
-	auto dir = targetActor->GetActorLocation() - pawn->GetActorLocation();
-
-	auto value = FVector::DotProduct(dir.GetSafeNormal(), pawnForwardVector.GetSafeNormal());
-	auto angle = FMath::Acos(value);
-
-	auto isVisible = FMath::Abs(angle) <= m_vision_angle;
-
-	if (isVisible) {
-		bool isWall = SDTUtils::Raycast(GetWorld(), pawn->GetActorLocation(), targetActor->GetActorLocation());
-		if (isWall) {
-			DrawDebugLine(GetWorld(), pawn->GetActorLocation(), targetActor->GetActorLocation(), FColor::Red, false,10,1,32);
-		}else {
-			DrawDebugLine(GetWorld(), pawn->GetActorLocation(), targetActor->GetActorLocation(), FColor::Green, false, 10, 1, 32);
-		}
-	}
-	return isVisible;
-}

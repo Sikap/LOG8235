@@ -32,7 +32,14 @@ bool ASDTCollectible::IsOnCooldown()
     return m_CollectCooldownTimer.IsValid();
 }
 
+
 void ASDTCollectible::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
+    
+
+    if (isMoveable) {
+
+    }
 }
+
