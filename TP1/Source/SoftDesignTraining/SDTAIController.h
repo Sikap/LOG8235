@@ -31,4 +31,6 @@ private:
     float m_wall_cast = 350;
     float m_side_cast = 200;
     bool m_initialized = false;
+    float m_vision_angle = PI / 2.00f;
+    float m_Collectebale_detection_reduis = 500;
 };
