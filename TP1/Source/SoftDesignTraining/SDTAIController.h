@@ -10,6 +10,17 @@
 /**
  * 
  */
+
+
+UENUM()
+enum ASDTAIState {
+    Idle                UMETA(DisplayName = "Idle"),
+    Roaming             UMETA(DisplayName = "Roaming"),
+    GoingForPickup      UMETA(DisplayName = "GoingForPickup"),
+    Attacking           UMETA(DisplayName = "Attacking"),
+    Fleeing             UMETA(DisplayName = "Fleeing"),
+};
+
 UCLASS(ClassGroup = AI, config = Game)
 class SOFTDESIGNTRAINING_API ASDTAIController : public AAIController
 {
@@ -18,18 +29,26 @@ public:
     virtual void Tick(float deltaTime) override;
 private:
 
+    const FVector UNDEFINED_TARGET_POINT = FVector(-1, -1, -1);
+    FVector runIdleState();
     void WallAvoidance();
     bool DeathFloorAvoidance();
-    void MoveTowardsPickup();
-    bool IsInsideCone(APawn* pawn, AActor* targetActor) const;
-
+    FVector MoveTowardsPickup();
+    FVector PlayerDetection();
+    bool IsInsideCone(FVector targetActor) const;
+    bool MoveToTargetPoint(float deltatime);
     FVector m_speed;
+    FVector m_targetPoint = UNDEFINED_TARGET_POINT;
     APawn* m_pawn;
 
-    float m_accel = 300;
-    float m_max_speed = 600;
-    float m_wall_cast = 350;
-    float m_side_cast = 200;
+    ASDTAIState state = ASDTAIState::Idle;
+
+
+
+    float m_accel = 425;
+    float m_max_speed = 300;
+    float m_wall_cast = 200;
+    float m_side_cast = 100;
     bool m_initialized = false;
     float m_vision_angle = PI / 2.00f;
     float m_Collectebale_detection_reduis = 500;

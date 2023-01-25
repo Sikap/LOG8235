@@ -13,6 +13,7 @@ ASDTCollectible::ASDTCollectible()
 void ASDTCollectible::BeginPlay()
 {
     Super::BeginPlay();
+    initialPosition = GetActorLocation();
 }
 
 void ASDTCollectible::Collect()
