@@ -2,6 +2,8 @@
 
 #include "SDTCollectible.h"
 #include "SoftDesignTraining.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "SDTUtils.h"
 
 ASDTCollectible::ASDTCollectible()
 {
@@ -25,6 +27,7 @@ void ASDTCollectible::OnCooldownDone()
     GetWorld()->GetTimerManager().ClearTimer(m_CollectCooldownTimer);
 
     GetStaticMeshComponent()->SetVisibility(true);
+    SetActorLocation(initialPosition);
 }
 
 bool ASDTCollectible::IsOnCooldown()
@@ -32,7 +35,18 @@ bool ASDTCollectible::IsOnCooldown()
     return m_CollectCooldownTimer.IsValid();
 }
 
+
 void ASDTCollectible::Tick(float deltaTime)
 {
-    Super::Tick(deltaTime);
+    //Super::Tick(deltaTime);
+    if (isMoveable && !IsOnCooldown()) {
+        // Etat initiale
+        FVector Location = GetActorLocation();
+		//m_currentVelocity +=  m_accel * deltaTime;
+		Location += GetActorRightVector() * m_initialSpeed * deltaTime;
+		SetActorLocation(Location);
+		
+    }
+    
+    
 }

@@ -19,6 +19,7 @@ public:
     void Collect();
     void OnCooldownDone();
     bool IsOnCooldown();
+    
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
     float m_CollectCooldownDuration = 10.f;
@@ -33,5 +34,9 @@ public:
 
 protected:
     FTimerHandle m_CollectCooldownTimer;
+
+private:
+    float m_initialSpeed = 500;
+    float m_accel = 250;
 	
 };
