@@ -252,11 +252,20 @@ FVector ASDTAIController::PlayerDetection() {
 	*/
 
 
-    APawn* pawn = GetPawn();
+    APawn* pawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
     // Check if player is valid
     if (pawn)
     {
+
+		if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
+			state = ASDTAIState::Fleeing;
+		}
+		else {
+			state = ASDTAIState::Attacking;
+
+		}
+
         FVector playerLocation = pawn->GetActorLocation();
         FVector currentLocation = GetPawn()->GetActorLocation();
         FVector directionToPlayer = playerLocation - currentLocation;
@@ -278,9 +287,9 @@ FVector ASDTAIController::PlayerDetection() {
                     // No state change needed
                     break;
                 default:
+					break;
                     //Should never happen 
             }
-
             // Move towards or away from the player depending on current state
             if (state == ASDTAIState::Attacking)
             {
@@ -299,5 +308,9 @@ FVector ASDTAIController::PlayerDetection() {
             }
         }
     }
+	else {
+
+		UE_LOG(LogTemp, Warning, TEXT("No player controleld"));
+	}
 	return m_targetPoint;
 }
