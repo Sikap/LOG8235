@@ -250,5 +250,54 @@ FVector ASDTAIController::PlayerDetection() {
 		Also Should set the state of the agent using below before returning
 		state = ASDTAIState::STATE
 	*/
+
+
+    APawn* pawn = GetPawn();
+
+    // Check if player is valid
+    if (pawn)
+    {
+        FVector playerLocation = pawn->GetActorLocation();
+        FVector currentLocation = GetPawn()->GetActorLocation();
+        FVector directionToPlayer = playerLocation - currentLocation;
+        float distanceToPlayer = directionToPlayer.Size();
+		FVector forwardVector = GetPawn()->GetActorForwardVector();
+
+        // Check if player is within detection range
+        //if (distanceToPlayer <= detectionRadius)
+		if(FVector::DotProduct(forwardVector, directionToPlayer.GetSafeNormal()) > 0)
+        {
+            switch (state)
+            {
+                case ASDTAIState::Roaming:
+                case ASDTAIState::GoingForPickup:
+                    state = ASDTAIState::Attacking;
+                    break;
+                case ASDTAIState::Attacking:
+                case ASDTAIState::Fleeing:
+                    // No state change needed
+                    break;
+                default:
+                    //Should never happen 
+            }
+
+            // Move towards or away from the player depending on current state
+            if (state == ASDTAIState::Attacking)
+            {
+                return playerLocation;
+            }
+            else if (state == ASDTAIState::Fleeing)
+            {
+                return currentLocation - directionToPlayer;
+            }
+        }
+        else
+        {
+            if (state == ASDTAIState::Attacking || state == ASDTAIState::Fleeing)
+            {
+                state = ASDTAIState::Roaming;
+            }
+        }
+    }
 	return m_targetPoint;
 }
