@@ -68,7 +68,7 @@ void ASDTAIController::Tick(float deltaTime)
 			// We are currently going for a collectible, but we need to check detections for player
 			m_targetPoint = MoveTowardsPickup();
 			m_targetPoint = PlayerDetection();
-			//DrawDebugSphere(GetWorld(), m_targetPoint, 90, 30, FColor::Purple);
+			//DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Purple);
 			break;
 
 		case ASDTAIState::Attacking:
@@ -252,21 +252,12 @@ FVector ASDTAIController::PlayerDetection() {
 	*/
 
 
-    APawn* pawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-
+    APawn* player = GetWorld()->GetFirstPlayerController()->GetPawn();
     // Check if player is valid
-    if (pawn)
+    if (player)
     {
 
-		if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
-			state = ASDTAIState::Fleeing;
-		}
-		else {
-			state = ASDTAIState::Attacking;
-
-		}
-
-        FVector playerLocation = pawn->GetActorLocation();
+        FVector playerLocation = player->GetActorLocation();
         FVector currentLocation = GetPawn()->GetActorLocation();
         FVector directionToPlayer = playerLocation - currentLocation;
         float distanceToPlayer = directionToPlayer.Size();
@@ -276,41 +267,29 @@ FVector ASDTAIController::PlayerDetection() {
         //if (distanceToPlayer <= detectionRadius)
 		if(FVector::DotProduct(forwardVector, directionToPlayer.GetSafeNormal()) > 0)
         {
-            switch (state)
-            {
-                case ASDTAIState::Roaming:
-                case ASDTAIState::GoingForPickup:
-                    state = ASDTAIState::Attacking;
-                    break;
-                case ASDTAIState::Attacking:
-                case ASDTAIState::Fleeing:
-                    // No state change needed
-                    break;
-                default:
-					break;
-                    //Should never happen 
-            }
+          
             // Move towards or away from the player depending on current state
-            if (state == ASDTAIState::Attacking)
-            {
-                return playerLocation;
-            }
-            else if (state == ASDTAIState::Fleeing)
-            {
+			if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
+				state = ASDTAIState::Fleeing;
                 return currentLocation - directionToPlayer;
-            }
+			}
+			else {
+				state = ASDTAIState::Attacking;
+				return playerLocation;
+			}
         }
-        else
+        else if(state == ASDTAIState::Attacking || ASDTAIState::Fleeing)
         {
-            if (state == ASDTAIState::Attacking || state == ASDTAIState::Fleeing)
-            {
-                state = ASDTAIState::Roaming;
-            }
+			// We were attacking or fleeing from the player but the player
+			// Is not detectible anymore, so we return to an idle state and will find something
+			// To do next frame
+			state = ASDTAIState::Idle;
         }
     }
 	else {
 
 		UE_LOG(LogTemp, Warning, TEXT("No player controleld"));
 	}
+	// We do not need to change the target point, no player was detected
 	return m_targetPoint;
 }
