@@ -5,7 +5,7 @@
 #include "SDTCollectible.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "SDTUtils.h"
-
+#include <List>
 
 /*
 	This controller must react to the environement and has key features
@@ -39,11 +39,12 @@
 
 void ASDTAIController::Tick(float deltaTime)
 {
+	checkParameterValidity();
 
 	if (!m_initialized) {
 		// We must ovveride some values in the charactermovement compoent to use our values
 		UCharacterMovementComponent* movCompoent = static_cast<UCharacterMovementComponent*>(GetPawn()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
-		movCompoent->MaxAcceleration = m_accel;
+		movCompoent->MaxAcceleration = m_acceleration;
 		movCompoent->MaxWalkSpeed = m_max_speed;
 		m_initialized = true;
 	}
@@ -122,7 +123,7 @@ bool ASDTAIController::MoveToTargetPoint(float deltaTime) {
 	
 	// Speed is controlled by an acceleration value
 	// By defayult the pawn keeps accelerating in the direction it is currently going
-	m_speed = m_speed + (m_accel * deltaTime) * direction;
+	m_speed = m_speed + (m_acceleration * deltaTime) * direction;
 
 	if (!DeathFloorAvoidance()) {
 		WallAvoidance();
@@ -292,4 +293,31 @@ FVector ASDTAIController::PlayerDetection() {
 	}
 	// We do not need to change the target point, no player was detected
 	return m_targetPoint;
+}
+
+
+void ASDTAIController::checkParameterValidity()
+{
+	
+	if (m_max_speed <= 0 )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_max_speed must be positive"));
+	}
+	if (m_acceleration <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_acceleration must be positive"));
+	}
+	if (m_Collectebale_detection_reduis <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_Collectebale_detection_reduis must be positive"));
+	}
+	if (m_wall_cast <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_wall_cast must be positive"));
+	}
+	if (m_side_cast <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_side_cast must be positive"));
+	}
+	
 }
