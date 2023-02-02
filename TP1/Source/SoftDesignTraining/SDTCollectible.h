@@ -7,25 +7,34 @@
 #include "SDTCollectible.generated.h"
 
 /**
- * 
+ *
  */
+
+UENUM()
+enum ASDTCollectibleState {
+    InitialState                UMETA(DisplayName = "InitialState"),
+    LeftAcceleration             UMETA(DisplayName = "LeftAcceleration"),
+    RightAcceleration        UMETA(DisplayName = "RightAcceleration"),
+    CoolDown                UMETA(DisplayName = "CoolDown"),
+};
+
 UCLASS()
 class SOFTDESIGNTRAINING_API ASDTCollectible : public AStaticMeshActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
+
 public:
     ASDTCollectible();
 
     void Collect();
     void OnCooldownDone();
     bool IsOnCooldown();
-    
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-    float m_CollectCooldownDuration = 10.f;
+        float m_CollectCooldownDuration = 10.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-    bool isMoveable = false;
+        bool isMoveable = false;
 
     virtual void Tick(float deltaTime) override;
     virtual void BeginPlay() override;
@@ -34,9 +43,9 @@ public:
 
 protected:
     FTimerHandle m_CollectCooldownTimer;
-
 private:
-    float m_initialSpeed = 500;
-    float m_accel = 250;
-	
+    float speed;
+    float acceleration;
+    float m_wall_cast = 350.f;
+    ASDTCollectibleState state = ASDTCollectibleState::InitialState;
 };
