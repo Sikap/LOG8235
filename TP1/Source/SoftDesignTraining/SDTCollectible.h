@@ -45,7 +45,9 @@ protected:
     FTimerHandle m_CollectCooldownTimer;
 private:
     float speed;
+    float max_speed = 5.f;
+    float m_raycast = 1850.f;
     float acceleration;
-    float m_wall_cast = 350.f;
+
     ASDTCollectibleState state = ASDTCollectibleState::InitialState;
 };
