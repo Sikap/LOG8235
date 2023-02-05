@@ -2,7 +2,6 @@
 
 #include "SDTCollectible.h"
 #include "SoftDesignTraining.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "SDTUtils.h"
 
 ASDTCollectible::ASDTCollectible()
@@ -28,7 +27,7 @@ void ASDTCollectible::OnCooldownDone()
     GetWorld()->GetTimerManager().ClearTimer(m_CollectCooldownTimer);
 
     GetStaticMeshComponent()->SetVisibility(true);
-    SetActorLocation(initialPosition);
+    state = ASDTCollectibleState::InitialState;
 }
 
 bool ASDTCollectible::IsOnCooldown()
@@ -36,18 +35,80 @@ bool ASDTCollectible::IsOnCooldown()
     return m_CollectCooldownTimer.IsValid();
 }
 
-
 void ASDTCollectible::Tick(float deltaTime)
 {
-    //Super::Tick(deltaTime);
-    if (isMoveable && !IsOnCooldown()) {
-        // Etat initiale
-        FVector Location = GetActorLocation();
-		//m_currentVelocity +=  m_accel * deltaTime;
-		Location += GetActorRightVector() * m_initialSpeed * deltaTime;
-		SetActorLocation(Location);
-		
-    }
-    
-}
 
+    if (isMoveable) {
+        switch (state) {
+        case ASDTCollectibleState::InitialState: {
+
+            speed = 5.f;
+            acceleration = 2.5f;
+
+            FVector positon = GetActorLocation();
+            speed += acceleration * deltaTime;
+
+            // detect the wall
+            FVector endPosRight = positon + GetActorRightVector() * 400.f;
+            if (SDTUtils::Raycast(GetWorld(), positon, endPosRight)) {
+                state = ASDTCollectibleState::LeftAcceleration;
+            }
+            else {
+                positon += GetActorRightVector() * speed;
+                SetActorLocation(positon);
+
+            }
+        }
+                                               break;
+        case ASDTCollectibleState::RightAcceleration:
+        {
+
+            acceleration = 2.5f;
+
+            FVector positon = GetActorLocation();
+            speed += acceleration * deltaTime;
+
+            // detect the wall
+            FVector endPosRight = positon + (GetActorRightVector() * m_raycast) + GetActorRightVector();
+            if (SDTUtils::Raycast(GetWorld(), positon, endPosRight)) {
+                state = ASDTCollectibleState::LeftAcceleration;
+            }
+            else {
+                positon += GetActorRightVector() * speed;
+                SetActorLocation(positon);
+                m_raycast += 0.01f;
+
+            }
+        }
+        break;
+
+        case ASDTCollectibleState::LeftAcceleration:
+        {
+
+            acceleration = -2.5f;
+            speed += acceleration * deltaTime;
+
+            // detect the wall
+            FVector positon = GetActorLocation();
+            FVector endPosLeft = positon - (GetActorRightVector() * m_raycast) - GetActorRightVector();
+            if (SDTUtils::Raycast(GetWorld(), positon, endPosLeft)) {
+                state = ASDTCollectibleState::RightAcceleration;
+            }
+            else {
+                positon += GetActorRightVector() * speed;
+                SetActorLocation(positon);
+                m_raycast += 0.01f;
+            }
+        }
+        break;
+        case ASDTCollectibleState::CoolDown:
+            m_raycast = 1850.f;
+            SetActorLocation(initialPosition);
+            state = ASDTCollectibleState::InitialState;
+            break;
+        }
+
+
+    }
+
+}
