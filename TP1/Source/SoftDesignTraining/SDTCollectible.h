@@ -24,8 +24,8 @@ class SOFTDESIGNTRAINING_API ASDTCollectible : public AStaticMeshActor
     GENERATED_BODY()
 
 public:
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMyDelegate);
     ASDTCollectible();
-
     void Collect();
     void OnCooldownDone();
     bool IsOnCooldown();
@@ -35,6 +35,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
         bool isMoveable = false;
+    
+    FMyDelegate OnSomeEvent;
+
 
     virtual void Tick(float deltaTime) override;
     virtual void BeginPlay() override;
@@ -43,6 +46,7 @@ public:
 
 protected:
     FTimerHandle m_CollectCooldownTimer;
+
 private:
     float speed;
     float max_speed = 5.f;

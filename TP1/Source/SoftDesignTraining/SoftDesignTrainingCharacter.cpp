@@ -25,6 +25,8 @@ void ASoftDesignTrainingCharacter::OnBeginOverlap(UPrimitiveComponent* Overlappe
 {
     if (OtherComponent->GetCollisionObjectType() == COLLISION_DEATH_OBJECT)
     {
+        // Broadcast death event (by deathfloor) in order to count 
+        deathEvent.Broadcast();
         SetActorLocation(m_StartingPosition);
     }
     else if(ASDTCollectible* collectibleActor = Cast<ASDTCollectible>(OtherActor))

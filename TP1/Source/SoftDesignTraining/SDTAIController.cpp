@@ -56,33 +56,33 @@ void ASDTAIController::Tick(float deltaTime)
 		case ASDTAIState::Idle:
 			// We check detections and if nothing found we generate random point to go to
 			m_targetPoint = runIdleState();
-			DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Red);
+			// DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Red);
 			break;
 		
 		case ASDTAIState::Roaming:
 			//We are currently going to a RandomPoint, but we need to check detections and ovveride if collectible or player
 			m_targetPoint = MoveTowardsPickup();
 			m_targetPoint = PlayerDetection();
-			DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Blue);
+			// DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Blue);
 			break;
 
 		case ASDTAIState::GoingForPickup:
 			// We are currently going for a collectible, but we need to check detections for player
 			m_targetPoint = MoveTowardsPickup();
 			m_targetPoint = PlayerDetection();
-			DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Purple);
+			// DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Purple);
 			break;
 
 		case ASDTAIState::Attacking:
 			// We are currently going for a player but we need to verify that we can still reach the player (if not go back to idle for next frame)
 			m_targetPoint = PlayerDetection();
-			DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Black);
+			// DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Black);
 			break;
 
 		case ASDTAIState::Fleeing:
 			// We are currently running away from a player but we need to verify that we are still seeing the player (if not go back to idle for next frame)
 			m_targetPoint = PlayerDetection();
-			DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Black);
+			// DrawDebugSphere(GetWorld(), m_targetPoint, 30, 30, FColor::Black);
 			break;
 
 
@@ -152,9 +152,9 @@ void ASDTAIController::WallAvoidance() {
 	FVector endPosLeft = startPos + GetPawn()->GetActorForwardVector().RotateAngleAxis(-15, FVector::UpVector) * m_wall_cast;
 
 	// If we hit something (a wall)
-	DrawDebugLine(GetWorld(), startPos, endPos, FColor::Red);
-	DrawDebugLine(GetWorld(), startPos, endPosLeft, FColor::Green);
-	DrawDebugLine(GetWorld(), startPos, endPosRight, FColor::Blue);
+	// DrawDebugLine(GetWorld(), startPos, endPos, FColor::Red);
+	// DrawDebugLine(GetWorld(), startPos, endPosLeft, FColor::Green);
+	// DrawDebugLine(GetWorld(), startPos, endPosRight, FColor::Blue);
 
 	float offset = 0;
 	if (SDTUtils::Raycast(GetWorld(), startPos, endPos)) {
