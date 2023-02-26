@@ -27,7 +27,7 @@ class SOFTDESIGNTRAINING_API ASDTAIController : public AAIController
     GENERATED_BODY()
 public:
     virtual void Tick(float deltaTime) override; 
-
+    virtual void OnPossess(APawn* p) override;
     // Max speed of the Agent
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (ClampMin = 0))
     float m_max_speed = 300;

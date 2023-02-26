@@ -17,15 +17,16 @@ void ASDTCollectible::BeginPlay()
 
 void ASDTCollectible::Collect()
 {
+    state = ASDTCollectibleState::CoolDown;
     GetWorld()->GetTimerManager().SetTimer(m_CollectCooldownTimer, this, &ASDTCollectible::OnCooldownDone, m_CollectCooldownDuration, false);
-
     GetStaticMeshComponent()->SetVisibility(false);
+    OnSomeEvent.Broadcast();
 }
 
 void ASDTCollectible::OnCooldownDone()
 {
+    SetActorLocation(initialPosition);
     GetWorld()->GetTimerManager().ClearTimer(m_CollectCooldownTimer);
-
     GetStaticMeshComponent()->SetVisibility(true);
     state = ASDTCollectibleState::InitialState;
 }
@@ -37,76 +38,105 @@ bool ASDTCollectible::IsOnCooldown()
 
 void ASDTCollectible::Tick(float deltaTime)
 {
-    // Super::Tick(deltaTime);
 
-   /*  // move the actor right
-    FVector position = GetActorLocation();
-    position += GetActorRightVector() * speed * deltaTime;
-    SetActorLocation(position);
-
-    // detect the wall
-    FVector startPos = position;
-    FVector endPosRight = startPos + GetActorRightVector() * m_wall_cast;
-    FVector endPosLeft = startPos - GetActorRightVector() * m_wall_cast;  */
     if (isMoveable) {
-
-
         switch (state) {
-        case ASDTCollectibleState::InitialState:
-            SetActorLocation(initialPosition);
-            speed = 5.f;
-            acceleration = 0;
-            state = ASDTCollectibleState::RightAcceleration;
-            break;
-        case ASDTCollectibleState::RightAcceleration:
-        {
-            FVector positon = GetActorLocation();
-            speed += acceleration * deltaTime;
 
+
+        case ASDTCollectibleState::InitialState: {
+            // In the initial state the collectible has a speed of 5m/s 
+            // In this state it moves in the direction of the right forward vector of the collectible
+            // Units are usualy in cm so we multiply by 100
+            speed = 5.0f;
             acceleration = 2.5f;
 
-            // detect the wall
-            FVector endPosRight = positon + GetActorRightVector() * 1250.f;
+            FVector positon = GetActorLocation();
+            FVector direction = GetActorRightVector();
+            direction.Normalize(0.001f);
+            // speed += acceleration * deltaTime;
+
+            // We are travelling at 500 cm/s and need 2 seconds to reach  0 velocity 
+            // We must then verify the wall distance at 400 cm (4 m) 
+            FVector endPosRight = positon + direction * 400.f;
             if (SDTUtils::Raycast(GetWorld(), positon, endPosRight)) {
                 state = ASDTCollectibleState::LeftAcceleration;
             }
             else {
-                positon += GetActorRightVector() * speed;
+               
+                positon +=  direction * speed;
                 SetActorLocation(positon);
+
+            }
+        }
+                                               break;
+        case ASDTCollectibleState::RightAcceleration:
+        {
+
+            acceleration = 2.5f;
+            speed += acceleration * deltaTime;
+
+            // We must cap the speed of the collectible to -500 cm/s
+            if (speed >= 5.0f) {
+                speed = 5.0f;
+            }
+
+            FVector positon = GetActorLocation();
+            FVector direction = GetActorRightVector();
+            direction.Normalize(0.001f);
+
+            // detect the wall
+            // FVector endPosRight = positon + (GetActorRightVector() * m_raycast) + GetActorRightVector();
+            FVector endPosRight = positon + GetActorRightVector() * 400.f;
+            if (SDTUtils::Raycast(GetWorld(), positon, endPosRight)) {
+                state = ASDTCollectibleState::LeftAcceleration;
+            }
+            else {
+                positon += direction * speed;
+                SetActorLocation(positon);
+                m_raycast += 0.01f;
+
             }
         }
         break;
 
         case ASDTCollectibleState::LeftAcceleration:
         {
+
             acceleration = -2.5f;
-            FVector positon = GetActorLocation();
             speed += acceleration * deltaTime;
 
+            // We must cap the speed of the collectible to -500 cm/s
+            if (speed <= -5.0f) {
+                speed = -5.0f;
+            }
 
-
-            // detect the wall
-            FVector endPosLeft = positon + GetActorRightVector() * -1900.f;
-            if (SDTUtils::Raycast(GetWorld(), positon, endPosLeft)) {
+            FVector direction = GetActorRightVector();
+            direction.Normalize(0.001f);
+            FVector positon = GetActorLocation();
+            // FVector endPosLeft = positon - (GetActorRightVector() * m_raycast) - GetActorRightVector();
+            //if (SDTUtils::Raycast(GetWorld(), positon, endPosLeft)) {
+            // We are travelling at 500 cm/s and need 2 seconds to reach  0 velocity 
+            // We must then verify the wall distance at 400 cm (10 m) 
+            FVector endPosRight = positon + direction * -400.f;
+            if (SDTUtils::Raycast(GetWorld(), positon, endPosRight)) {
                 state = ASDTCollectibleState::RightAcceleration;
             }
             else {
-                positon += GetActorRightVector() * speed;
+                positon += direction * speed;
                 SetActorLocation(positon);
+                m_raycast += 0.01f;
             }
         }
         break;
+
         case ASDTCollectibleState::CoolDown:
-            state = ASDTCollectibleState::InitialState;
+            //m_raycast = 1850.f;
+            //SetActorLocation(initialPosition);
+            // state = ASDTCollectibleState::InitialState;
             break;
         }
 
+
     }
-
-
-
-
-
-
 
 }
