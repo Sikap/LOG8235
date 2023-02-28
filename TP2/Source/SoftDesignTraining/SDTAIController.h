@@ -46,12 +46,15 @@ public:
 
 public:
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
-    void AIStateInterrupted();
+    void AIStateInterrupted();    
+    //ShowPathToClosestCollectible is Added by Simon 
+    void ShowPathToClosestCollectible();
 
 protected:
     void OnMoveToTarget();
     void GetHightestPriorityDetectionHit(const TArray<FHitResult>& hits, FHitResult& outDetectionHit);
     void UpdatePlayerInteraction(float deltaTime);
+    
 
 private:
     virtual void GoToBestTarget(float deltaTime) override;

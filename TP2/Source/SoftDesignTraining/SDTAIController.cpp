@@ -18,7 +18,8 @@ ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
 
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
-    //Move to target depending on current behavior
+    
+    //Move to target depending on current behavior 
 }
 
 void ASDTAIController::OnMoveToTarget()
@@ -36,11 +37,13 @@ void ASDTAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollow
 void ASDTAIController::ShowNavigationPath()
 {
     //Show current navigation path DrawDebugLine and DrawDebugSphere
+
 }
 
 void ASDTAIController::ChooseBehavior(float deltaTime)
 {
     UpdatePlayerInteraction(deltaTime);
+    ShowPathToClosestCollectible();
 }
 
 void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
@@ -69,7 +72,6 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
 
     FHitResult detectionHit;
     GetHightestPriorityDetectionHit(allDetectionHits, detectionHit);
-
     //Set behavior based on hit
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
@@ -99,4 +101,33 @@ void ASDTAIController::AIStateInterrupted()
 {
     StopMovement();
     m_ReachedTarget = true;
+}
+
+void ASDTAIController::ShowPathToClosestCollectible() {
+    FVector startPos = GetPawn()->GetActorLocation();
+
+    TArray<AActor*> Collectibles;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), Collectibles);
+
+    AActor* ClosestCollectible = nullptr;
+    float MinDistance = MAX_FLT;
+    for (AActor* Collectible : Collectibles)
+    {
+        if (Collectible)
+        {
+            float Distance = FVector::Dist(Collectible->GetActorLocation(), GetPawn()->GetActorLocation());
+            if (Distance < MinDistance)
+            {
+                MinDistance = Distance;
+                ClosestCollectible = Collectible;
+            }
+        }
+    }
+
+    if (ClosestCollectible)
+    {
+
+        DrawDebugLine(GetWorld(), startPos, ClosestCollectible->GetActorLocation(), FColor::Red);
+
+    }
 }
