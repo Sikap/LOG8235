@@ -1,9 +1,7 @@
 .vs
 Binaries
-Content
 DerivedDataCache
 Intermediate
 Saved
 *.sln
 *.uproject
-Config
