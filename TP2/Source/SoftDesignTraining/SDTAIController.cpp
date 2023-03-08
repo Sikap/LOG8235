@@ -10,6 +10,8 @@
 //#include "UnrealMathUtility.h"
 #include "SDTUtils.h"
 #include "EngineUtils.h"
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
 
 ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer.SetDefaultSubobjectClass<USDTPathFollowingComponent>(TEXT("PathFollowingComponent")))
@@ -104,7 +106,6 @@ void ASDTAIController::AIStateInterrupted()
 }
 
 void ASDTAIController::ShowPathToClosestCollectible() {
-    FVector startPos = GetPawn()->GetActorLocation();
 
     TArray<AActor*> Collectibles;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), Collectibles);
@@ -127,7 +128,39 @@ void ASDTAIController::ShowPathToClosestCollectible() {
     if (ClosestCollectible)
     {
 
-        DrawDebugLine(GetWorld(), startPos, ClosestCollectible->GetActorLocation(), FColor::Red);
-
+        FindNavPathWithBestCost(GetPawn(), ClosestCollectible->GetActorLocation());
     }
 }
+
+
+UNavigationPath* ASDTAIController::GetPath(FVector EndLocation) {
+    UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+   
+    FVector myLocation = GetPawn()->GetActorLocation();
+    return NavSys->FindPathToLocationSynchronously(GetWorld(), myLocation, EndLocation);
+}
+
+void ASDTAIController::FindNavPathWithBestCost(AActor* StartActor, FVector EndLocation)
+{
+    UNavigationPath* NavPath = GetPath(EndLocation);
+
+
+    // Check if the path was found successfully.
+    if (NavPath == nullptr || !NavPath->IsValid())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No path found."));
+        return;
+    }
+
+    // Display the path by drawing lines between the path points.
+    for (int32 i = 0; i < NavPath->PathPoints.Num() - 1; i++)
+    {
+        FVector Start = NavPath->PathPoints[i];
+        FVector End = NavPath->PathPoints[i + 1];
+        DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.0f, 0, 3.0f);
+    }
+}
+
+
+
+

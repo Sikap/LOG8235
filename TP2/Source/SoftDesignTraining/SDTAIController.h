@@ -47,8 +47,10 @@ public:
 public:
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
     void AIStateInterrupted();    
-    //ShowPathToClosestCollectible is Added by Simon 
+    //ShowPathToClosestCollectible and FindNavPathWithBestCost is Added by Simon 
     void ShowPathToClosestCollectible();
+    void FindNavPathWithBestCost(AActor* StartActor, FVector EndLocation);
+    UNavigationPath* GetPath(FVector targetLocation);
 
 protected:
     void OnMoveToTarget();
