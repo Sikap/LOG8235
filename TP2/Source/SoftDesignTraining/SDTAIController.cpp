@@ -12,6 +12,7 @@
 #include "EngineUtils.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
+#include "NavAreas/NavArea_Obstacle.h"
 
 ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer.SetDefaultSubobjectClass<USDTPathFollowingComponent>(TEXT("PathFollowingComponent")))
@@ -135,7 +136,10 @@ void ASDTAIController::ShowPathToClosestCollectible() {
 
 UNavigationPath* ASDTAIController::GetPath(FVector EndLocation) {
     UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-   
+    
+    TSubclassOf<UNavArea> NavAreaClass = UNavArea_Obstacle::StaticClass();
+    NavAreaClass.GetDefaultObject()->DefaultCost = 100.f;
+
     FVector myLocation = GetPawn()->GetActorLocation();
     return NavSys->FindPathToLocationSynchronously(GetWorld(), myLocation, EndLocation);
 }
