@@ -44,6 +44,14 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     bool Landing = false;
 
+    // Added member variable for last known player location
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+        FVector m_LastKnownPlayerLocation; 
+
+    // Added member variable for AI state
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+        ASDTAIState state = ASDTAIState::Idle; 
+
 public:
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
     void AIStateInterrupted();    
@@ -56,6 +64,8 @@ protected:
     void OnMoveToTarget();
     void GetHightestPriorityDetectionHit(const TArray<FHitResult>& hits, FHitResult& outDetectionHit);
     void UpdatePlayerInteraction(float deltaTime);
+    void GoToPlayer();
+    void GoToFleeLocation();
     
 
 private:

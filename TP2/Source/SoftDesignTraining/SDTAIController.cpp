@@ -76,6 +76,18 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
     FHitResult detectionHit;
     GetHightestPriorityDetectionHit(allDetectionHits, detectionHit);
     //Set behavior based on hit
+    // check if player is powered up 
+    // if True => flee player
+    if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
+        state = ASDTAIState::Fleeing;
+        return currentLocation - directionToPlayer;
+    }
+    // if Not => attack player 
+    else {
+        MoveTo
+        }
+
+    
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
