@@ -23,6 +23,47 @@ void ASDTAIController::GoToBestTarget(float deltaTime)
 {
     
     //Move to target depending on current behavior 
+    //Move to target depending on current behavior
+    bool isMoveSuccessful = false;
+    switch (state) {
+    case ChasingCollectible:
+        isMoveSuccessful = MoveToClosestCollectible();
+        break;
+    /*case FLEE_PLAYER:
+        isMoveSuccessful = MoveToBestFleePoint();
+        break;*/
+    }
+
+    if (isMoveSuccessful)
+        OnMoveToTarget();
+    else
+        state = ChasingCollectible;
+}
+
+// collectible
+bool ASDTAIController::MoveToClosestCollectible() {
+    TArray<AActor*> collectibles;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), collectibles);
+
+    float minPathLength = INT_MAX;
+    AActor* closestCollectible = nullptr;
+    for (AActor* collectible : collectibles) {
+
+        if (Cast<ASDTCollectible>(collectible)->IsOnCooldown()) continue;
+
+        UNavigationSystemV1* navSys = UNavigationSystemV1::GetCurrent(GetWorld());
+
+        UNavigationPath* path = navSys->FindPathToLocationSynchronously(GetWorld(), GetPawn()->GetActorLocation(), collectible->GetActorLocation());
+
+        float currentPathLength = path->GetPathLength();
+
+        if (currentPathLength <= minPathLength) {
+            minPathLength = currentPathLength;
+            closestCollectible = collectible;
+        }
+    }
+
+    return closestCollectible != nullptr && MoveToLocation(closestCollectible->GetActorLocation()) == EPathFollowingRequestResult::RequestSuccessful;
 }
 
 void ASDTAIController::OnMoveToTarget()
@@ -52,8 +93,10 @@ void ASDTAIController::ChooseBehavior(float deltaTime)
 void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
 {
     //finish jump before updating AI state
-    if (AtJumpSegment)
+    if (AtJumpSegment) {
+       // Jump(deltaTime);
         return;
+    }
 
     APawn* selfPawn = GetPawn();
     if (!selfPawn)
@@ -78,18 +121,24 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
     //Set behavior based on hit
     // check if player is powered up 
     // if True => flee player
-    if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
-        state = ASDTAIState::Fleeing;
-        return currentLocation - directionToPlayer;
-    }
-    // if Not => attack player 
-    else {
-        MoveTo
-        }
+    //if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
+    //    state = ASDTAIState::Fleeing;
+    //    return currentLocation - directionToPlayer;
+    //}
+    //// if Not => attack player 
+    //else {
+    //    MoveTo
+    //    }
 
     
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
+    if (detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_COLLECTIBLE) {
+        if (state != ChasingCollectible && m_CanChangeBehavior) {
+            AIStateInterrupted();
+            state = ChasingCollectible;
+        }
+    }
 }
 
 void ASDTAIController::GetHightestPriorityDetectionHit(const TArray<FHitResult>& hits, FHitResult& outDetectionHit)

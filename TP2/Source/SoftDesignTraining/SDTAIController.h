@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS(ClassGroup = AI, config = Game)
 class SOFTDESIGNTRAINING_API ASDTAIController : public ASDTBaseAIController
 {
@@ -48,9 +49,8 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
         FVector m_LastKnownPlayerLocation; 
 
-    // Added member variable for AI state
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
-        ASDTAIState state = ASDTAIState::Idle; 
+        
+
 
 public:
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
@@ -59,6 +59,7 @@ public:
     void ShowPathToClosestCollectible();
     void FindNavPathWithBestCost(AActor* StartActor, FVector EndLocation);
     UNavigationPath* GetPath(FVector targetLocation);
+    bool MoveToClosestCollectible();
 
 protected:
     void OnMoveToTarget();
@@ -69,7 +70,10 @@ protected:
     
 
 private:
+    enum ASDTAIState { ChasePlayer, Fleeing, ChasingCollectible };
+    ASDTAIState state = ChasingCollectible;
     virtual void GoToBestTarget(float deltaTime) override;
     virtual void ChooseBehavior(float deltaTime) override;
     virtual void ShowNavigationPath() override;
+    bool m_CanChangeBehavior = false;
 };

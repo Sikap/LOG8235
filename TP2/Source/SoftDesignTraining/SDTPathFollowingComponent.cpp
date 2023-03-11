@@ -15,34 +15,40 @@ USDTPathFollowingComponent::USDTPathFollowingComponent(const FObjectInitializer&
 
 void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 {
-    const TArray<FNavPathPoint>& points = Path->GetPathPoints();
-    const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
+	const TArray<FNavPathPoint>& points = Path->GetPathPoints();
+	const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
 
-    if (SDTUtils::HasJumpFlag(segmentStart))
-    {
-        //update jump
-    }
-    else
-    {
-        //update navigation along path
-    }
+
+	if (!SDTUtils::HasJumpFlag(segmentStart))
+	{
+		Super::FollowPathSegment(DeltaTime);
+	}
 }
 
 void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 {
-    Super::SetMoveSegment(segmentStartIndex);
+	Super::SetMoveSegment(segmentStartIndex);
 
-    const TArray<FNavPathPoint>& points = Path->GetPathPoints();
+	const TArray<FNavPathPoint>& points = Path->GetPathPoints();
 
-    const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
+	const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
+	const FNavPathPoint& segmentEnd = points[MoveSegmentStartIndex + 1];
+	ASDTAIController* controller = Cast<ASDTAIController>(GetOwner());
 
-    if (SDTUtils::HasJumpFlag(segmentStart) && FNavMeshNodeFlags(segmentStart.Flags).IsNavLink())
-    {
-        //Handle starting jump
-    }
-    else
-    {
-        //Handle normal segments
-    }
+
+	if (SDTUtils::HasJumpFlag(segmentStart) && FNavMeshNodeFlags(segmentStart.Flags).IsNavLink())
+	{
+		//Handle starting jump
+		//controller->StartJump();
+		Cast<UCharacterMovementComponent>(MovementComp)->SetMovementMode(MOVE_Flying);
+		controller->GetPawn()->SetActorRotation((segmentEnd.Location - segmentStart.Location).GetSafeNormal().ToOrientationRotator());
+		controller->GetPawn()->GetMovementComponent()->Velocity = FVector(segmentEnd.Location - segmentStart.Location).GetSafeNormal() * controller->JumpSpeed;
+	}
+	else
+	{
+		//Handle normal segments
+		Cast<UCharacterMovementComponent>(MovementComp)->SetMovementMode(MOVE_NavWalking);
+	}
 }
+
 
