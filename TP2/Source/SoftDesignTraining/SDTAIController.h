@@ -9,6 +9,13 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class ASDTAIState : uint8 {
+    Attacking UMETA(DisplayName = "Attacking"),
+    Fleeing UMETA(DisplayName = "Fleeing"),
+    ChasingCollectible UMETA(DisplayName = "ChasingCollectible"),
+    Idle UMETA(DisplayName = "Idle")
+};
 
 UCLASS(ClassGroup = AI, config = Game)
 class SOFTDESIGNTRAINING_API ASDTAIController : public ASDTBaseAIController
@@ -34,7 +41,7 @@ public:
     float JumpApexHeight = 300.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-    float JumpSpeed = 6.f;
+    float JumpSpeed = 1.f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     bool AtJumpSegment = false;
@@ -47,10 +54,14 @@ public:
 
     // Added member variable for last known player location
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
-        FVector m_LastKnownPlayerLocation; 
-
-        
-
+    FVector lastKnownPlayerLocation;
+  
+    // Added member variable for AI state
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+    ASDTAIState state = ASDTAIState::ChasingCollectible;
+      
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+    float m_FleeRadius = 600;
 
 public:
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
@@ -66,13 +77,13 @@ protected:
     void OnMoveToTarget();
     void GetHightestPriorityDetectionHit(const TArray<FHitResult>& hits, FHitResult& outDetectionHit);
     void UpdatePlayerInteraction(float deltaTime);
-    void GoToPlayer();
-    void GoToFleeLocation();
+    bool GoToPlayer();
+    bool GoToFleeLocation();
     
 
 private:
-    enum ASDTAIState { ChasePlayer, Fleeing, ChasingCollectible };
-    ASDTAIState state = ChasingCollectible;
+   
+    
     virtual void GoToBestTarget(float deltaTime) override;
     virtual void ChooseBehavior(float deltaTime) override;
     virtual void ShowNavigationPath() override;

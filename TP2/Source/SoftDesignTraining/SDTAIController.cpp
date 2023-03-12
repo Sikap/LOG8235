@@ -24,25 +24,87 @@ void ASDTAIController::BeginPlay() {
     USDTPathFollowingComponent* ref = Cast<USDTPathFollowingComponent>(GetPathFollowingComponent());
     ref->controllerRef = this;
 }
+
+bool ASDTAIController::GoToPlayer()
+{
+    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!playerCharacter)
+        return false;
+
+    FVector playerLocation;
+
+    // TODO : Check if player is visible
+    if (true) {
+        playerLocation = playerCharacter->GetActorLocation();
+ 
+    }
+    else {
+        // Player is not visible, move to last known position
+        playerLocation = lastKnownPlayerLocation;
+    }
+
+    return MoveToLocation(playerLocation) == EPathFollowingRequestResult::RequestSuccessful;
+}
+
+bool ASDTAIController::GoToFleeLocation()
+{
+    TArray<AActor*> fleeLocations;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), fleeLocations);
+    if (fleeLocations.Num() <= 0)
+        return false;
+
+    FVector selfLocation = GetPawn()->GetActorLocation();
+    float bestDistance = -1;
+    FVector bestLocation;
+
+    // Find closest flee location
+    for (AActor* fleeLocation : fleeLocations) {
+        float distance = FVector::Distance(selfLocation, fleeLocation->GetActorLocation());
+
+        if (bestDistance < 0 || distance < bestDistance) {
+            bestDistance = distance;
+            bestLocation = fleeLocation->GetActorLocation();
+        }
+    }
+
+    UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+    FNavLocation NavLocation;
+
+    // Check if the flee location is valid and reachable
+    if (NavSystem->GetRandomPointInNavigableRadius(bestLocation, m_FleeRadius, NavLocation)) {
+        return MoveToLocation( NavLocation.Location) == EPathFollowingRequestResult::RequestSuccessful;
+    }
+    return false;
+}
+
+
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
     
     //Move to target depending on current behavior 
-    //Move to target depending on current behavior
+
     bool isMoveSuccessful = false;
     switch (state) {
-    case ChasingCollectible:
-        isMoveSuccessful = MoveToClosestCollectible();
-        break;
-    /*case FLEE_PLAYER:
-        isMoveSuccessful = MoveToBestFleePoint();
-        break;*/
+
+
+        case ASDTAIState::Attacking:
+            isMoveSuccessful = GoToPlayer();
+            break;
+
+        case ASDTAIState::Fleeing:
+            isMoveSuccessful = GoToFleeLocation();
+            break;
+
+        case ASDTAIState::ChasingCollectible:
+            isMoveSuccessful = MoveToClosestCollectible();
+            break;
+    
     }
 
     if (isMoveSuccessful)
         OnMoveToTarget();
     else
-        state = ChasingCollectible;
+        state = ASDTAIState::ChasingCollectible;
 }
 
 // collectible
@@ -123,25 +185,35 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
 
     FHitResult detectionHit;
     GetHightestPriorityDetectionHit(allDetectionHits, detectionHit);
-    //Set behavior based on hit
-    // check if player is powered up 
-    // if True => flee player
-    //if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
-    //    state = ASDTAIState::Fleeing;
-    //    return currentLocation - directionToPlayer;
-    //}
-    //// if Not => attack player 
-    //else {
-    //    MoveTo
-    //    }
 
+    // check if player is powered up
+    bool isPlayerPoweredUp = SDTUtils::IsPlayerPoweredUp(GetWorld());
+
+    // set the AI state based on player detection
+    if (isPlayerPoweredUp && detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
+    {
+        // Player is powered up 
+        state = ASDTAIState::Fleeing;
+        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
+    }
+    else if (!isPlayerPoweredUp && detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
+    {
+        // Player is not powered up and attacking
+        state = ASDTAIState::Attacking;
+        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
+    }
+    else
+    {
+      
+        state = ASDTAIState::ChasingCollectible;
+    }
     
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
     if (detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_COLLECTIBLE) {
-        if (state != ChasingCollectible && m_CanChangeBehavior) {
+        if (state != ASDTAIState::ChasingCollectible && m_CanChangeBehavior) {
             AIStateInterrupted();
-            state = ChasingCollectible;
+            state = ASDTAIState::ChasingCollectible;
         }
     }
 }
