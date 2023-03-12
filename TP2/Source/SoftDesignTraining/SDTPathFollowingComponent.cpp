@@ -58,7 +58,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 
 	if (SDTUtils::HasJumpFlag(segmentStart) && FNavMeshNodeFlags(segmentStart.Flags).IsNavLink())
 	{
-
+		controllerRef->AtJumpSegment = true;
 		float distanceToTravel = FVector::Distance(segmentStart.Location, segmentEnd.Location);
 		timeToTravel = distanceToTravel / (controllerRef->JumpSpeed * 6.f);
 		currentJumpT = 0;
@@ -67,6 +67,8 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 	else
 	{
 		//Handle normal segments
+		currentJumpT = 0;
+		controllerRef->AtJumpSegment = false;
 		Cast<UCharacterMovementComponent>(MovementComp)->SetMovementMode(MOVE_NavWalking);
 	}
 }
