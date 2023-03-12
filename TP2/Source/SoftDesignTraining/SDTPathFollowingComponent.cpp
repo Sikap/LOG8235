@@ -23,6 +23,9 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 	{
 		Super::FollowPathSegment(DeltaTime);
 	}
+	else {
+		Super::FollowPathSegment(DeltaTime);
+	}
 }
 
 void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
@@ -33,16 +36,12 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 
 	const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
 	const FNavPathPoint& segmentEnd = points[MoveSegmentStartIndex + 1];
-	ASDTAIController* controller = Cast<ASDTAIController>(GetOwner());
+	
 
 
 	if (SDTUtils::HasJumpFlag(segmentStart) && FNavMeshNodeFlags(segmentStart.Flags).IsNavLink())
 	{
-		//Handle starting jump
-		//controller->StartJump();
-		Cast<UCharacterMovementComponent>(MovementComp)->SetMovementMode(MOVE_Flying);
-		controller->GetPawn()->SetActorRotation((segmentEnd.Location - segmentStart.Location).GetSafeNormal().ToOrientationRotator());
-		controller->GetPawn()->GetMovementComponent()->Velocity = FVector(segmentEnd.Location - segmentStart.Location).GetSafeNormal() * controller->JumpSpeed;
+		
 	}
 	else
 	{
