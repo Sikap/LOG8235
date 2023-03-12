@@ -17,8 +17,14 @@ class SOFTDESIGNTRAINING_API USDTPathFollowingComponent : public UPathFollowingC
 
 public:
     ASDTAIController* controllerRef; 
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     float timeToTravel;
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     float currentJumpT;
+    
+    
     FVector basePlayerLocation;
     virtual void FollowPathSegment(float deltaTime) override;
     virtual void SetMoveSegment(int32 segmentStartIndex) override;
