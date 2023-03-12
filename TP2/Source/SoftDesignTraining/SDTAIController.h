@@ -47,8 +47,11 @@ public:
 
     // Added member variable for last known player location
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
-        FVector m_LastKnownPlayerLocation; 
-
+    FVector LastKnownPlayerLocation; 
+  
+    // Added member variable for AI state
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+    ASDTAIState state = ASDTAIState::Idle;
         
 
 

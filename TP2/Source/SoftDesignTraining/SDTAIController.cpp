@@ -19,10 +19,71 @@ ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
 {
 }
 
+
+void ASDTAIController::GoToPlayer()
+{
+    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!playerCharacter)
+        return;
+
+    FVector playerLocation = playerCharacter->GetActorLocation();
+    UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+
+    // TODO : Check if player is visible
+    if () {
+        NavSystem->SimpleMoveToLocation(this, playerLocation);
+    }
+    else {
+        // Player is not visible, move to last known position
+        NavSystem->SimpleMoveToLocation(this, lastKnownPlayerLocation);
+    }
+}
+
+void ASDTAIController::GoToFleeLocation()
+{
+    TArray<AActor*> fleeLocations;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), collectibles)
+    if (fleeLocations.Num() <= 0)
+        return;
+
+    FVector selfLocation = GetPawn()->GetActorLocation();
+    float bestDistance = -1;
+    FVector bestLocation;
+
+    // Find closest flee location
+    for (ASDTFleeLocation* fleeLocation : fleeLocations) {
+        float distance = FVector::Distance(selfLocation, fleeLocation->GetActorLocation());
+
+        if (bestDistance < 0 || distance < bestDistance) {
+            bestDistance = distance;
+            bestLocation = fleeLocation->GetActorLocation();
+        }
+    }
+
+    UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+    FNavLocation NavLocation;
+
+    // Check if the flee location is valid and reachable
+    if (NavSystem->GetRandomPointInNavigableRadius(bestLocation, m_FleeRadius, NavLocation)) {
+        NavSystem->SimpleMoveToLocation(this, NavLocation.Location);
+    }
+}
+
+
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
     
     //Move to target depending on current behavior 
+   
+    if (state == ASDTAIState::Attacking)
+    {
+        GoToPlayer(deltaTime);
+    }
+    else if (state == ASDTAIState::Fleeing)
+    {
+        GoToFleeLocation(deltaTime);
+    }
+
     //Move to target depending on current behavior
     bool isMoveSuccessful = false;
     switch (state) {
@@ -118,18 +179,28 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
 
     FHitResult detectionHit;
     GetHightestPriorityDetectionHit(allDetectionHits, detectionHit);
-    //Set behavior based on hit
-    // check if player is powered up 
-    // if True => flee player
-    //if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
-    //    state = ASDTAIState::Fleeing;
-    //    return currentLocation - directionToPlayer;
-    //}
-    //// if Not => attack player 
-    //else {
-    //    MoveTo
-    //    }
 
+    // check if player is powered up
+    bool isPlayerPoweredUp = SDTUtils::IsPlayerPoweredUp(GetWorld());
+
+    // set the AI state based on player detection
+    if (isPlayerPoweredUp && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
+    {
+        // Player is powered up 
+        state = ASDTAIState::Fleeing;
+        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
+    }
+    else if (!isPlayerPoweredUp && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
+    {
+        // Player is not powered up and attacking
+        state = ASDTAIState::Attacking;
+        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
+    }
+    else
+    {
+      
+        state = ASDTAIState::Idle;
+    }
     
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
