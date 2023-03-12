@@ -29,11 +29,11 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 			Super::FollowPathSegment(DeltaTime);
 			return;
 		}
-		
+		 
 		currentJumpT += DeltaTime;
 		FVector direction = Path->GetSegmentDirection(MoveSegmentStartIndex + 1);
-		//										   m (normalized to cm)       s                m/s   to cm/s
-		FVector dir = segmentStart.Location + (direction * currentJumpT * controllerRef->JumpSpeed * 6.f);
+		//										   m (normalized to cm)       s                m/s   
+		FVector dir = segmentStart.Location + (direction * currentJumpT * controllerRef->JumpSpeed);
 		float jumpCurveVal = controllerRef->JumpCurve->GetFloatValue(currentJumpT / timeToTravel);
 		float playerHeight = basePlayerLocation.Z + controllerRef->JumpApexHeight * jumpCurveVal;
 
@@ -60,7 +60,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 	{
 		controllerRef->AtJumpSegment = true;
 		float distanceToTravel = FVector::Distance(segmentStart.Location, segmentEnd.Location);
-		timeToTravel = distanceToTravel / (controllerRef->JumpSpeed * 6.f);
+		timeToTravel = distanceToTravel / (controllerRef->JumpSpeed);
 		currentJumpT = 0;
 		basePlayerLocation = controllerRef->GetPawn()->GetActorLocation();
 	}
