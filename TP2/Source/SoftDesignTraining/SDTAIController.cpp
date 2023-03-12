@@ -31,29 +31,26 @@ bool ASDTAIController::GoToPlayer()
     if (!playerCharacter)
         return false;
 
-    FVector playerLocation;
-
     // TODO : Check if player is visible
     if (true) {
-        playerLocation = playerCharacter->GetActorLocation();
- 
-    }
-    else {
-        // Player is not visible, move to last known position
-        playerLocation = lastKnownPlayerLocation;
+        // update position
+        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
+
     }
 
-    return MoveToLocation(playerLocation) == EPathFollowingRequestResult::RequestSuccessful;
+    return MoveToLocation(lastKnownPlayerLocation) == EPathFollowingRequestResult::RequestSuccessful;
 }
 
 bool ASDTAIController::GoToFleeLocation()
 {
     TArray<AActor*> fleeLocations;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), fleeLocations);
+
     if (fleeLocations.Num() <= 0)
         return false;
 
     FVector selfLocation = GetPawn()->GetActorLocation();
+
     float bestDistance = -1;
     FVector bestLocation;
 
@@ -67,14 +64,10 @@ bool ASDTAIController::GoToFleeLocation()
         }
     }
 
-    UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-    FNavLocation NavLocation;
 
-    // Check if the flee location is valid and reachable
-    if (NavSystem->GetRandomPointInNavigableRadius(bestLocation, m_FleeRadius, NavLocation)) {
-        return MoveToLocation( NavLocation.Location) == EPathFollowingRequestResult::RequestSuccessful;
-    }
-    return false;
+    // Check if the flee location is valid and reachable todo 
+    return MoveToLocation(bestLocation) == EPathFollowingRequestResult::RequestSuccessful;
+    
 }
 
 
@@ -82,7 +75,6 @@ void ASDTAIController::GoToBestTarget(float deltaTime)
 {
     
     //Move to target depending on current behavior 
-
     bool isMoveSuccessful = false;
     switch (state) {
 
@@ -103,8 +95,7 @@ void ASDTAIController::GoToBestTarget(float deltaTime)
 
     if (isMoveSuccessful)
         OnMoveToTarget();
-    else
-        state = ASDTAIState::ChasingCollectible;
+
 }
 
 // collectible
@@ -114,12 +105,12 @@ bool ASDTAIController::MoveToClosestCollectible() {
 
     float minPathLength = INT_MAX;
     AActor* closestCollectible = nullptr;
+    
     for (AActor* collectible : collectibles) {
 
         if (Cast<ASDTCollectible>(collectible)->IsOnCooldown()) continue;
 
         UNavigationSystemV1* navSys = UNavigationSystemV1::GetCurrent(GetWorld());
-
         UNavigationPath* path = navSys->FindPathToLocationSynchronously(GetWorld(), GetPawn()->GetActorLocation(), collectible->GetActorLocation());
 
         float currentPathLength = path->GetPathLength();
@@ -141,7 +132,6 @@ void ASDTAIController::OnMoveToTarget()
 void ASDTAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
     Super::OnMoveCompleted(RequestID, Result);
-
     m_ReachedTarget = true;
 }
 
