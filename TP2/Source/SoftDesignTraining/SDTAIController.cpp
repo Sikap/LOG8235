@@ -133,7 +133,7 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
     
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
-    if (detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_COLLECTIBLE) {
+    if (detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_COLLECTIBLE) {
         if (state != ChasingCollectible && m_CanChangeBehavior) {
             AIStateInterrupted();
             state = ChasingCollectible;
