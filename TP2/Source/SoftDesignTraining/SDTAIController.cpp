@@ -19,6 +19,11 @@ ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
 {
 }
 
+void ASDTAIController::BeginPlay() {
+    Super::BeginPlay();
+    USDTPathFollowingComponent* ref = Cast<USDTPathFollowingComponent>(GetPathFollowingComponent());
+    ref->controllerRef = this;
+}
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
     
@@ -213,7 +218,6 @@ void ASDTAIController::FindNavPathWithBestCost(AActor* StartActor, FVector EndLo
     // Check if the path was found successfully.
     if (NavPath == nullptr || !NavPath->IsValid())
     {
-        UE_LOG(LogTemp, Warning, TEXT("No path found."));
         return;
     }
 

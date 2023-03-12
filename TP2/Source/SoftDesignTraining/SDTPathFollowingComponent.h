@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "SDTAIController.h"
 #include "SDTPathFollowingComponent.generated.h"
 
 /**
@@ -15,6 +16,10 @@ class SOFTDESIGNTRAINING_API USDTPathFollowingComponent : public UPathFollowingC
     GENERATED_UCLASS_BODY()
 
 public:
+    ASDTAIController* controllerRef; 
+    float timeToTravel;
+    float currentJumpT;
+    FVector basePlayerLocation;
     virtual void FollowPathSegment(float deltaTime) override;
     virtual void SetMoveSegment(int32 segmentStartIndex) override;
 };

@@ -34,7 +34,7 @@ public:
     float JumpApexHeight = 300.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-    float JumpSpeed = 1.f;
+    float JumpSpeed = 6.f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     bool AtJumpSegment = false;
@@ -60,6 +60,7 @@ public:
     void FindNavPathWithBestCost(AActor* StartActor, FVector EndLocation);
     UNavigationPath* GetPath(FVector targetLocation);
     bool MoveToClosestCollectible();
+    virtual void BeginPlay() override;
 
 protected:
     void OnMoveToTarget();
