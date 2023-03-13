@@ -68,6 +68,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 	{
 		//Handle normal segments
 		currentJumpT = 0;
+		timeToTravel = 0;
 		controllerRef->AtJumpSegment = false;
 		Cast<UCharacterMovementComponent>(MovementComp)->SetMovementMode(MOVE_NavWalking);
 	}
