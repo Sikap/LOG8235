@@ -35,6 +35,9 @@ bool ASDTAIController::GoToPlayer()
 
 bool ASDTAIController::GoToFleeLocation()
 {
+    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!playerCharacter)
+        return false;
 
     if (fleeLocationRef != nullptr)
     {
@@ -55,17 +58,33 @@ bool ASDTAIController::GoToFleeLocation()
 
     // Find closest flee location that is reachable and in the right orientation
     for (AActor* fleeLocation : fleeLocations) {
-        UNavigationSystemV1* navSys = UNavigationSystemV1::GetCurrent(GetWorld());
-        UNavigationPath* path = navSys->FindPathToLocationSynchronously(GetWorld(), GetPawn()->GetActorLocation(), fleeLocation->GetActorLocation());
 
-        float currentPathLength = path->GetPathLength();
 
-        if (currentPathLength <= minPathLength) {
-            minPathLength = currentPathLength;
-            fleeLocationRef = fleeLocation;
+        FVector dir = selfLocation - playerCharacter->GetActorLocation();
+        FVector dirToFlee = fleeLocation->GetActorLocation() - selfLocation;
+
+        auto value = FVector::DotProduct(dirToFlee.GetSafeNormal(), dir.GetSafeNormal());
+
+        auto angle = FMath::Acos(value);
+        auto isVisible = FMath::Abs(angle) <= PI;
+ 
+
+        if (isVisible){
+            UNavigationSystemV1* navSys = UNavigationSystemV1::GetCurrent(GetWorld());
+            UNavigationPath* path = navSys->FindPathToLocationSynchronously(GetWorld(), GetPawn()->GetActorLocation(), fleeLocation->GetActorLocation());
+
+            float currentPathLength = path->GetPathLength();
+
+            if (currentPathLength <= minPathLength) {
+                minPathLength = currentPathLength;
+                fleeLocationRef = fleeLocation;
+            }
         }
     }
 
+    if (fleeLocationRef == nullptr) {
+        fleeLocationRef = fleeLocations[0];
+    }
 
     // Check if the flee location is valid and reachable todo 
     return MoveToLocation(fleeLocationRef->GetActorLocation()) == EPathFollowingRequestResult::RequestSuccessful;

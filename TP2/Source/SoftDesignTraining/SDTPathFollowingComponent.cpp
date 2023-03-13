@@ -41,7 +41,7 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 
 		AActor* pawn = controllerRef->GetPawn();
 		pawn->SetActorLocation(FVector(dir.X, dir.Y, playerHeight));
-		pawn->SetActorRotation(FVector(dir.X, dir.Y, 0).Rotation());
+		//pawn->SetActorRotation(FVector(dir.X, dir.Y, 0).Rotation());
 
 		
 	}
@@ -66,6 +66,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 		timeToTravel = distanceToTravel / (initSpeed);
 		currentJumpT = 0;
 		basePlayerLocation = controllerRef->GetPawn()->GetActorLocation();
+		controllerRef->GetPawn()->SetActorRotation(Path->GetSegmentDirection(MoveSegmentStartIndex + 1).Rotation());
 	}
 	else
 	{
