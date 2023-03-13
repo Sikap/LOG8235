@@ -41,8 +41,8 @@ public:
     float JumpApexHeight = 300.f;
 
     // cm/s
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-    float JumpSpeed = 600.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI)
+    float JumpSpeed = 600.f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     bool AtJumpSegment = false;

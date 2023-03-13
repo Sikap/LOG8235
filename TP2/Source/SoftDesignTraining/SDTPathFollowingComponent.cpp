@@ -29,8 +29,10 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 			Super::FollowPathSegment(DeltaTime);
 			return;
 		}
-		 
+		
+
 		currentJumpT += DeltaTime;
+		//UE_LOG(LogTemp, Warning, TEXT("Current progress value %f and total jump time: %f , current jump time: %f, pawn jump speed is : %f  "), currentJumpT / timeToTravel, timeToTravel, currentJumpT, controllerRef->JumpSpeed);
 		FVector direction = Path->GetSegmentDirection(MoveSegmentStartIndex + 1);
 		//										   m (normalized to cm)       s                m/s   
 		FVector dir = segmentStart.Location + (direction * currentJumpT * controllerRef->JumpSpeed);
@@ -68,7 +70,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 	{
 		//Handle normal segments
 		currentJumpT = 0;
-		timeToTravel = 0;
+		//timeToTravel = 0;
 		controllerRef->AtJumpSegment = false;
 		Cast<UCharacterMovementComponent>(MovementComp)->SetMovementMode(MOVE_NavWalking);
 	}
