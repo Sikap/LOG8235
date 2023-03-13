@@ -24,7 +24,11 @@ class SOFTDESIGNTRAINING_API ASDTAIController : public ASDTBaseAIController
 
 public:
     ASDTAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
+    
+    
+    UFUNCTION(BlueprintCallable)
+    void SetAtJumpSegment(bool b);
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
     float m_DetectionCapsuleHalfLength = 500.f;
 
@@ -70,7 +74,7 @@ public:
     bool MoveToClosestCollectible();
     virtual void BeginPlay() override;
     void AIStateInterrupted();
-
+   
 protected:
     void OnMoveToTarget();
     void GetHightestPriorityDetectionHit(const TArray<FHitResult>& hits, FHitResult& outDetectionHit);

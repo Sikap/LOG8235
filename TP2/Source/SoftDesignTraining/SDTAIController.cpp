@@ -273,3 +273,7 @@ void ASDTAIController::AIStateInterrupted() {
     collectibleRef = nullptr;
     
 }
+
+void ASDTAIController::SetAtJumpSegment(bool b) {
+    AtJumpSegment = b;
+}
