@@ -35,7 +35,7 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Current progress value %f and total jump time: %f , current jump time: %f, pawn jump speed is : %f  "), currentJumpT / timeToTravel, timeToTravel, currentJumpT, controllerRef->JumpSpeed);
 		FVector direction = Path->GetSegmentDirection(MoveSegmentStartIndex + 1);
 		//										   m (normalized to cm)       s                m/s   
-		FVector dir = segmentStart.Location + (direction * currentJumpT * controllerRef->JumpSpeed);
+		FVector dir = segmentStart.Location + (direction * currentJumpT * 600.f);
 		float jumpCurveVal = controllerRef->JumpCurve->GetFloatValue(currentJumpT / timeToTravel);
 		float playerHeight = basePlayerLocation.Z + controllerRef->JumpApexHeight * jumpCurveVal;
 
@@ -62,7 +62,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 	{
 		controllerRef->AtJumpSegment = true;
 		float distanceToTravel = FVector::Distance(segmentStart.Location, segmentEnd.Location);
-		timeToTravel = distanceToTravel / (controllerRef->JumpSpeed);
+		timeToTravel = distanceToTravel / (600.f);
 		currentJumpT = 0;
 		basePlayerLocation = controllerRef->GetPawn()->GetActorLocation();
 	}
