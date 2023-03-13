@@ -27,49 +27,50 @@ void ASDTAIController::BeginPlay() {
 
 bool ASDTAIController::GoToPlayer()
 {
-    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-    if (!playerCharacter)
-        return false;
-
-    // TODO : Check if player is visible
-    if (true) {
-        // update position
-        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
-
-    }
+    if (FMath::IsWithin(FVector::Distance(oldLastPlayerLocation, lastKnownPlayerLocation), -1, 25)) { return false; }
+    oldLastPlayerLocation = lastKnownPlayerLocation;
 
     return MoveToLocation(lastKnownPlayerLocation) == EPathFollowingRequestResult::RequestSuccessful;
 }
 
 bool ASDTAIController::GoToFleeLocation()
 {
+
+    if (fleeLocationRef != nullptr)
+    {
+        // If we are already running towards a flee location we do not need to find a new one to go to
+        return false;
+    }
+
     TArray<AActor*> fleeLocations;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), fleeLocations);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTFleeLocation::StaticClass(), fleeLocations);
 
     if (fleeLocations.Num() <= 0)
         return false;
 
     FVector selfLocation = GetPawn()->GetActorLocation();
 
-    float bestDistance = -1;
-    FVector bestLocation;
+    float minPathLength = INT_MAX;
 
-    // Find closest flee location
+
+    // Find closest flee location that is reachable and in the right orientation
     for (AActor* fleeLocation : fleeLocations) {
-        float distance = FVector::Distance(selfLocation, fleeLocation->GetActorLocation());
+        UNavigationSystemV1* navSys = UNavigationSystemV1::GetCurrent(GetWorld());
+        UNavigationPath* path = navSys->FindPathToLocationSynchronously(GetWorld(), GetPawn()->GetActorLocation(), fleeLocation->GetActorLocation());
 
-        if (bestDistance < 0 || distance < bestDistance) {
-            bestDistance = distance;
-            bestLocation = fleeLocation->GetActorLocation();
+        float currentPathLength = path->GetPathLength();
+
+        if (currentPathLength <= minPathLength) {
+            minPathLength = currentPathLength;
+            fleeLocationRef = fleeLocation;
         }
     }
 
 
     // Check if the flee location is valid and reachable todo 
-    return MoveToLocation(bestLocation) == EPathFollowingRequestResult::RequestSuccessful;
+    return MoveToLocation(fleeLocationRef->GetActorLocation()) == EPathFollowingRequestResult::RequestSuccessful;
     
 }
-
 
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
@@ -93,18 +94,32 @@ void ASDTAIController::GoToBestTarget(float deltaTime)
     
     }
 
-    if (isMoveSuccessful)
+    if (isMoveSuccessful) {
         OnMoveToTarget();
-
+    }
+    if (m_ReachedTarget) {
+        state = ASDTAIState::ChasingCollectible;
+        fleeLocationRef = nullptr;
+        oldLastPlayerLocation = FVector(-1, -1, -1);
+        collectibleRef = nullptr;
+    }
 }
 
-// collectible
+// Collectible
 bool ASDTAIController::MoveToClosestCollectible() {
+
+
+    if (!(collectibleRef == nullptr || Cast<ASDTCollectible>(collectibleRef)->IsOnCooldown())) 
+    {
+        // If we are already running towards an active collectible we do not need to find a new one to go to
+        return false;
+    }
+
     TArray<AActor*> collectibles;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), collectibles);
 
     float minPathLength = INT_MAX;
-    AActor* closestCollectible = nullptr;
+
     
     for (AActor* collectible : collectibles) {
 
@@ -117,15 +132,16 @@ bool ASDTAIController::MoveToClosestCollectible() {
 
         if (currentPathLength <= minPathLength) {
             minPathLength = currentPathLength;
-            closestCollectible = collectible;
+            collectibleRef = collectible;
         }
     }
-
-    return closestCollectible != nullptr && MoveToLocation(closestCollectible->GetActorLocation()) == EPathFollowingRequestResult::RequestSuccessful;
+    
+    return collectibleRef != nullptr && MoveToLocation(collectibleRef->GetActorLocation()) == EPathFollowingRequestResult::RequestSuccessful;
 }
 
 void ASDTAIController::OnMoveToTarget()
 {
+  //  UE_LOG(LogTemp, Warning, TEXT(" SAETTING CURRENT STATUS: FALSE"));
     m_ReachedTarget = false;
 }
 
@@ -133,78 +149,82 @@ void ASDTAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollow
 {
     Super::OnMoveCompleted(RequestID, Result);
     m_ReachedTarget = true;
+  //  UE_LOG(LogTemp, Warning, TEXT(" SAETTING CURRENT STATUS: TRUE"));
 }
 
 void ASDTAIController::ShowNavigationPath()
 {
-    //Show current navigation path DrawDebugLine and DrawDebugSphere
+    FNavPathSharedPtr Path = GetPathFollowingComponent()->GetPath();
+    // Check if the path was found successfully.
+    if (Path == nullptr || !Path->IsValid())
+    {
+        return;
+    }
 
+    //Show current navigation path DrawDebugLine and DrawDebugSphere
+    // Display the path by drawing lines between the path points.
+
+    TArray<FNavPathPoint> PathPoints = Path->GetPathPoints();
+    for (int32 i = 0; i < PathPoints.Num() - 1; i++)
+    {
+
+        FVector Start = PathPoints[i];
+        FVector End = PathPoints[i + 1];
+      
+        DrawDebugSphere(GetWorld(), End, 50, 18, FColor::Blue, false, -1.0f, 0, 2.0f);
+        DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, -1.0f, 0, 3.0f);
+    }
 }
 
 void ASDTAIController::ChooseBehavior(float deltaTime)
 {
+    // Regardless of current state we must check player interaction
     UpdatePlayerInteraction(deltaTime);
-    ShowPathToClosestCollectible();
+
+    // Will create the move to querys depending on state and if it needs to be updated
+    GoToBestTarget(deltaTime);
+
 }
 
 void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
 {
-    //finish jump before updating AI state
+    // check if player is powered up
+    bool isPlayerPoweredUp = SDTUtils::IsPlayerPoweredUp(GetWorld());
+
+    // Finish jump before updating AI state 
+   
     if (AtJumpSegment) {
-       // Jump(deltaTime);
         return;
     }
 
-    APawn* selfPawn = GetPawn();
-    if (!selfPawn)
-        return;
-
-    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-    if (!playerCharacter)
-        return;
-
-    FVector detectionStartLocation = selfPawn->GetActorLocation() + selfPawn->GetActorForwardVector() * m_DetectionCapsuleForwardStartingOffset;
-    FVector detectionEndLocation = detectionStartLocation + selfPawn->GetActorForwardVector() * m_DetectionCapsuleHalfLength * 2;
-
+    FVector detectionEndLocation = GetPawn()->GetActorLocation() + GetPawn()->GetActorForwardVector() * m_DetectionCapsuleHalfLength * 2;
     TArray<TEnumAsByte<EObjectTypeQuery>> detectionTraceObjectTypes;
-    detectionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_COLLECTIBLE));
     detectionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_PLAYER));
 
     TArray<FHitResult> allDetectionHits;
-    GetWorld()->SweepMultiByObjectType(allDetectionHits, detectionStartLocation, detectionEndLocation, FQuat::Identity, detectionTraceObjectTypes, FCollisionShape::MakeSphere(m_DetectionCapsuleRadius));
+    GetWorld()->SweepMultiByObjectType(allDetectionHits, GetPawn()->GetActorLocation(), detectionEndLocation, FQuat::Identity, detectionTraceObjectTypes, FCollisionShape::MakeSphere(m_DetectionCapsuleRadius));
 
     FHitResult detectionHit;
     GetHightestPriorityDetectionHit(allDetectionHits, detectionHit);
 
-    // check if player is powered up
-    bool isPlayerPoweredUp = SDTUtils::IsPlayerPoweredUp(GetWorld());
-
     // set the AI state based on player detection
-    if (isPlayerPoweredUp && detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
+    if (detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
     {
-        // Player is powered up 
-        state = ASDTAIState::Fleeing;
-        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
-    }
-    else if (!isPlayerPoweredUp && detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
-    {
-        // Player is not powered up and attacking
-        state = ASDTAIState::Attacking;
-        lastKnownPlayerLocation = playerCharacter->GetActorLocation();
-    }
-    else
-    {
-      
-        state = ASDTAIState::ChasingCollectible;
-    }
-    
+        // TODO : Check if player is visible
+        if (!SDTUtils::Raycast(GetWorld(), GetPawn()->GetActorLocation(), detectionHit.GetActor()->GetActorLocation())) {
 
-    DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
-    if (detectionHit.bBlockingHit && detectionHit.GetComponent()->GetCollisionObjectType() == COLLISION_COLLECTIBLE) {
-        if (state != ASDTAIState::ChasingCollectible && m_CanChangeBehavior) {
-            AIStateInterrupted();
-            state = ASDTAIState::ChasingCollectible;
+            // By default when we see a player we want to attack it
+            state = ASDTAIState::Attacking;
+
+            // update position
+            lastKnownPlayerLocation = detectionHit.GetActor()->GetActorLocation();
         }
+        
+        // Player is powered and in the detection zone (but not sight) so we flee instead
+        if (isPlayerPoweredUp) {
+            state = ASDTAIState::Fleeing;
+        }
+
     }
 }
 
@@ -216,82 +236,21 @@ void ASDTAIController::GetHightestPriorityDetectionHit(const TArray<FHitResult>&
         {
             if (component->GetCollisionObjectType() == COLLISION_PLAYER)
             {
-                //we can't get more important than the player
+                // We Are looking for player collisions
                 outDetectionHit = hit;
                 return;
             }
-            else if (component->GetCollisionObjectType() == COLLISION_COLLECTIBLE)
-            {
-                outDetectionHit = hit;
-            }
         }
     }
 }
 
-void ASDTAIController::AIStateInterrupted()
-{
-    StopMovement();
-    m_ReachedTarget = true;
-}
-
-void ASDTAIController::ShowPathToClosestCollectible() {
-
-    TArray<AActor*> Collectibles;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), Collectibles);
-
-    AActor* ClosestCollectible = nullptr;
-    float MinDistance = MAX_FLT;
-    for (AActor* Collectible : Collectibles)
-    {
-        if (Collectible)
-        {
-            float Distance = FVector::Dist(Collectible->GetActorLocation(), GetPawn()->GetActorLocation());
-            if (Distance < MinDistance)
-            {
-                MinDistance = Distance;
-                ClosestCollectible = Collectible;
-            }
-        }
-    }
-
-    if (ClosestCollectible)
-    {
-
-        FindNavPathWithBestCost(GetPawn(), ClosestCollectible->GetActorLocation());
-    }
-}
-
-
-UNavigationPath* ASDTAIController::GetPath(FVector EndLocation) {
-    UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+void ASDTAIController::AIStateInterrupted() {
     
-    TSubclassOf<UNavArea> NavAreaClass = UNavArea_Obstacle::StaticClass();
-    NavAreaClass.GetDefaultObject()->DefaultCost = 100.f;
-
-    FVector myLocation = GetPawn()->GetActorLocation();
-    return NavSys->FindPathToLocationSynchronously(GetWorld(), myLocation, EndLocation);
+    //UE_LOG(LogTemp, Warning, TEXT(" SAETTING CURRENT STATUS: TRUE"));
+    m_ReachedTarget = true;
+    state = ASDTAIState::ChasingCollectible;
+    fleeLocationRef = nullptr;
+    oldLastPlayerLocation = FVector(-1, -1, -1);
+    collectibleRef = nullptr;
+    
 }
-
-void ASDTAIController::FindNavPathWithBestCost(AActor* StartActor, FVector EndLocation)
-{
-    UNavigationPath* NavPath = GetPath(EndLocation);
-
-
-    // Check if the path was found successfully.
-    if (NavPath == nullptr || !NavPath->IsValid())
-    {
-        return;
-    }
-
-    // Display the path by drawing lines between the path points.
-    for (int32 i = 0; i < NavPath->PathPoints.Num() - 1; i++)
-    {
-        FVector Start = NavPath->PathPoints[i];
-        FVector End = NavPath->PathPoints[i + 1];
-        DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.0f, 0, 3.0f);
-    }
-}
-
-
-
-

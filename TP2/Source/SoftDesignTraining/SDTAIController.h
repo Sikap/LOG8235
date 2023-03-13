@@ -40,8 +40,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
     float JumpApexHeight = 300.f;
 
+    // cm/s
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
-    float JumpSpeed = 1.f;
+    float JumpSpeed = 600.0f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     bool AtJumpSegment = false;
@@ -57,6 +58,7 @@ public:
     FVector lastKnownPlayerLocation;
   
     // Added member variable for AI state
+    // Default behaviour is to chase collectibles
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     ASDTAIState state = ASDTAIState::ChasingCollectible;
       
@@ -64,14 +66,10 @@ public:
     float m_FleeRadius = 600;
 
 public:
-    virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
-    void AIStateInterrupted();    
-    //ShowPathToClosestCollectible and FindNavPathWithBestCost is Added by Simon 
-    void ShowPathToClosestCollectible();
-    void FindNavPathWithBestCost(AActor* StartActor, FVector EndLocation);
-    UNavigationPath* GetPath(FVector targetLocation);
+    virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override; 
     bool MoveToClosestCollectible();
     virtual void BeginPlay() override;
+    void AIStateInterrupted();
 
 protected:
     void OnMoveToTarget();
@@ -87,5 +85,9 @@ private:
     virtual void GoToBestTarget(float deltaTime) override;
     virtual void ChooseBehavior(float deltaTime) override;
     virtual void ShowNavigationPath() override;
+
     bool m_CanChangeBehavior = false;
+    AActor* collectibleRef = nullptr;
+    AActor* fleeLocationRef = nullptr;
+    FVector oldLastPlayerLocation = FVector(-1,-1,-1);
 };
