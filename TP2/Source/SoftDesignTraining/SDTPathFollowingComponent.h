@@ -24,7 +24,7 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     float currentJumpT;
     
-    
+    float initSpeed;
     FVector basePlayerLocation;
     virtual void FollowPathSegment(float deltaTime) override;
     virtual void SetMoveSegment(int32 segmentStartIndex) override;
