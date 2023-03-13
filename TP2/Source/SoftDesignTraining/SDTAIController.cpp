@@ -64,9 +64,8 @@ bool ASDTAIController::GoToFleeLocation()
         FVector dirToFlee = fleeLocation->GetActorLocation() - selfLocation;
 
         auto value = FVector::DotProduct(dirToFlee.GetSafeNormal(), dir.GetSafeNormal());
-
         auto angle = FMath::Acos(value);
-        auto isVisible = FMath::Abs(angle) <= PI;
+        auto isVisible = FMath::Abs(angle) >= PI;
  
 
         if (isVisible){
@@ -173,6 +172,7 @@ void ASDTAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollow
 
 void ASDTAIController::ShowNavigationPath()
 {
+    return;
     FNavPathSharedPtr Path = GetPathFollowingComponent()->GetPath();
     // Check if the path was found successfully.
     if (Path == nullptr || !Path->IsValid())

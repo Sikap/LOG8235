@@ -22,11 +22,14 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
 	if (!SDTUtils::HasJumpFlag(segmentStart))
 	{
 		Super::FollowPathSegment(DeltaTime);
+		
+
 	}
 	else {
 
 		if ((currentJumpT / timeToTravel) > 1) {
 			Super::FollowPathSegment(DeltaTime);
+			controllerRef->AtJumpSegment = false;
 			return;
 		}
 		
