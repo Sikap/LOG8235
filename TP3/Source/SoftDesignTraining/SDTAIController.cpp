@@ -76,7 +76,7 @@ void ASDTAIController::MoveToPlayer()
     ACharacter * playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
     if (!playerCharacter)
         return;
-            MoveToActor(playerCharacter, 0.5f, false, true, true, NULL, false);
+    MoveToActor(playerCharacter, 0.5f, false, true, true, NULL, false);
     OnMoveToTarget();
 }
 
