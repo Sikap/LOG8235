@@ -10,6 +10,7 @@
 //#include "UnrealMathUtility.h"
 #include "SDTUtils.h"
 #include "EngineUtils.h"
+#include "AiAgentGroupManager.h"
 
 ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer.SetDefaultSubobjectClass<USDTPathFollowingComponent>(TEXT("PathFollowingComponent")))
@@ -75,8 +76,7 @@ void ASDTAIController::MoveToPlayer()
     ACharacter * playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
     if (!playerCharacter)
         return;
-
-    MoveToActor(playerCharacter, 0.5f, false, true, true, NULL, false);
+            MoveToActor(playerCharacter, 0.5f, false, true, true, NULL, false);
     OnMoveToTarget();
 }
 
@@ -280,6 +280,26 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
     DrawDebugString(GetWorld(), FVector(0.f, 0.f, 5.f), debugString, GetPawn(), FColor::Orange, 0.f, false);
 
     DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
+    
+    UpdateGroupMembership();
+}
+
+// Handels if the Agent should be part of the group
+void ASDTAIController::UpdateGroupMembership()
+{
+    AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+    if (aiAgentGroupManager)
+    {
+        if (m_PlayerInteractionBehavior == PlayerInteractionBehavior_Chase)
+        {
+            aiAgentGroupManager->RegisterAIAgent(this);
+            DrawDebugSphere(GetWorld(), GetPawn()->GetActorLocation() + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Purple);
+        }
+        else
+        {
+            aiAgentGroupManager->UnregisterAIAgent(this);
+        }
+    }
 }
 
 bool ASDTAIController::HasLoSOnHit(const FHitResult& hit)

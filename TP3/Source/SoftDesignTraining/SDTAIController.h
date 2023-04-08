@@ -16,6 +16,7 @@ class SOFTDESIGNTRAINING_API ASDTAIController : public ASDTBaseAIController
 
 public:
     ASDTAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+    
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
     float m_DetectionCapsuleHalfLength = 500.f;
@@ -64,11 +65,12 @@ protected:
     void OnPlayerInteractionNoLosDone();
     void OnMoveToTarget();
 
-public:
+public:    
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
     void RotateTowards(const FVector& targetLocation);
     void SetActorLocation(const FVector& targetLocation);
     void AIStateInterrupted();
+    void UpdateGroupMembership();
 
 private:
     virtual void GoToBestTarget(float deltaTime) override;
@@ -81,4 +83,7 @@ protected:
     FRotator m_ObstacleAvoidanceRotation;
     FTimerHandle m_PlayerInteractionNoLosTimer;
     PlayerInteractionBehavior m_PlayerInteractionBehavior;
+    float randAngle = 0.0f;
+
 };
+
