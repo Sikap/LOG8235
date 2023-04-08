@@ -6,6 +6,10 @@ class SOFTDESIGNTRAINING_API AAiAgentGroupManager
 {
 public:
 	// Sets default values for this empty's properties
+	
+    AAiAgentGroupManager();
+    ~AAiAgentGroupManager();
+	
 	static AAiAgentGroupManager* GetInstance();
 	static void Destroy();
 

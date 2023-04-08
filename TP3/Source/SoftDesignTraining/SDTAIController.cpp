@@ -20,6 +20,20 @@ ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
 
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
+    AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+    if (aiAgentGroupManager && m_PlayerInteractionBehavior == PlayerInteractionBehavior_Chase)
+    {
+        ACharacter * playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+        if (!playerCharacter) return;
+
+        FVector assignedPosition = aiAgentGroupManager->GetAgentAssignedPosition(this);
+        if (!assignedPosition.IsZero())
+        {
+            MoveToLocation(assignedPosition, 0.5f, false, true, true, NULL, false);
+            OnMoveToTarget();
+            return;
+        }
+    }
     switch (m_PlayerInteractionBehavior)
     {
     case PlayerInteractionBehavior_Collect:

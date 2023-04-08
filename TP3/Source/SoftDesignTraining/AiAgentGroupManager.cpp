@@ -6,6 +6,12 @@ AAiAgentGroupManager::AAiAgentGroupManager()
 {
 }
 
+AAiAgentGroupManager::~AAiAgentGroupManager()
+{
+    m_registeredAgents.Empty();
+    AgentAssignedPositions.Empty();
+}
+
 AAiAgentGroupManager* AAiAgentGroupManager::GetInstance()
 {
     if (!m_Instance)
@@ -42,15 +48,16 @@ bool AAiAgentGroupManager::UnregisterAIAgent(ASDTAIController* aiAgent){
     return false;
 }
 
+
 void AAiAgentGroupManager::AssignGroupPositions()
 {
     int32 numAgents = m_registeredAgents.Num();
     ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
     if (!playerCharacter || numAgents <= 0) return;
-
     FVector playerLocation = playerCharacter->GetActorLocation();
 
     float angleIncrement = 360.0f / numAgents;
+    AgentAssignedPositions.Empty();
     for (int32 i = 0; i < numAgents; ++i)
     {
         float angle = i * angleIncrement;
@@ -59,19 +66,13 @@ void AAiAgentGroupManager::AssignGroupPositions()
     }
 }
 
-void AAiAgentGroupManager::AssignGroupPositions()
+FVector AAiAgentGroupManager::GetAgentAssignedPosition(ASDTAIController* agent)
 {
-    int32 numAgents = m_registeredAgents.Num();
-    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-    if (!playerCharacter || numAgents <= 0) return;
-
-    FVector playerLocation = playerCharacter->GetActorLocation();
-
-    float angleIncrement = 360.0f / numAgents;
-    for (int32 i = 0; i < numAgents; ++i)
+    FVector* assignedPosition = AgentAssignedPositions.Find(agent);
+    if (assignedPosition)
     {
-        float angle = i * angleIncrement;
-        FVector offset = FVector(FMath::Cos(FMath::DegreesToRadians(angle)), FMath::Sin(FMath::DegreesToRadians(angle)), 0.0f) * 300.0f;
-        AgentAssignedPositions.Add(m_registeredAgents[i], playerLocation + offset);
+        return *assignedPosition;
     }
+
+    return FVector::ZeroVector;
 }
