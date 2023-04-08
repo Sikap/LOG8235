@@ -22,13 +22,56 @@ void AAiAgentGroupManager::Destroy()
     m_Instance = nullptr;
 }
 
-void AAiAgentGroupManager::RegisterAIAgent(ASDTAIController* aiAgent)
+bool AAiAgentGroupManager::RegisterAIAgent(ASDTAIController* aiAgent)
 {
-    m_registeredAgents.Add(aiAgent);
+    if (!m_registeredAgents.Contains(aiAgent))
+    {
+        m_registeredAgents.Add(aiAgent);
+        return true;
+    }
+    return false;
 }
 
-void AAiAgentGroupManager::UnregisterAIAgent(ASDTAIController* aiAgent){
+bool AAiAgentGroupManager::UnregisterAIAgent(ASDTAIController* aiAgent){
 
-    m_registeredAgents.Remove(aiAgent);
+    if (m_registeredAgents.Contains(aiAgent))
+    {
+        m_registeredAgents.Remove(aiAgent);
+        return true;
+    }
+    return false;
 }
 
+void AAiAgentGroupManager::AssignGroupPositions()
+{
+    int32 numAgents = m_registeredAgents.Num();
+    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!playerCharacter || numAgents <= 0) return;
+
+    FVector playerLocation = playerCharacter->GetActorLocation();
+
+    float angleIncrement = 360.0f / numAgents;
+    for (int32 i = 0; i < numAgents; ++i)
+    {
+        float angle = i * angleIncrement;
+        FVector offset = FVector(FMath::Cos(FMath::DegreesToRadians(angle)), FMath::Sin(FMath::DegreesToRadians(angle)), 0.0f) * 300.0f;
+        AgentAssignedPositions.Add(m_registeredAgents[i], playerLocation + offset);
+    }
+}
+
+void AAiAgentGroupManager::AssignGroupPositions()
+{
+    int32 numAgents = m_registeredAgents.Num();
+    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!playerCharacter || numAgents <= 0) return;
+
+    FVector playerLocation = playerCharacter->GetActorLocation();
+
+    float angleIncrement = 360.0f / numAgents;
+    for (int32 i = 0; i < numAgents; ++i)
+    {
+        float angle = i * angleIncrement;
+        FVector offset = FVector(FMath::Cos(FMath::DegreesToRadians(angle)), FMath::Sin(FMath::DegreesToRadians(angle)), 0.0f) * 300.0f;
+        AgentAssignedPositions.Add(m_registeredAgents[i], playerLocation + offset);
+    }
+}

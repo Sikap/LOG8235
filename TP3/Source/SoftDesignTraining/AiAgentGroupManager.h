@@ -9,8 +9,11 @@ public:
 	static AAiAgentGroupManager* GetInstance();
 	static void Destroy();
 
-	void RegisterAIAgent(ASDTAIController* aiAgent);
-	void UnregisterAIAgent(ASDTAIController* aiAgent);
+	bool RegisterAIAgent(ASDTAIController* aiAgent);
+	bool UnregisterAIAgent(ASDTAIController* aiAgent);
+	
+	void AssignGroupPositions();
+    FVector GetAgentAssignedPosition(ASDTAIController* agent);
 
 public:
 	//SINGLETON
@@ -18,5 +21,6 @@ public:
 	static AAiAgentGroupManager* m_Instance;
 
 	TArray<ASDTAIController*> m_registeredAgents;
+	TMap<ASDTAIController*, FVector> AgentAssignedPositions;
 };
 
