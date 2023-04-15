@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "SDTBaseAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "SDTAIController.generated.h"
 
 /**
@@ -65,14 +68,30 @@ protected:
     void OnPlayerInteractionNoLosDone();
     void OnMoveToTarget();
 
-public:    
+public:
+    // Behavior Tree
+    UBehaviorTreeComponent* GetBehaviorTreeComponent() const { return m_behaviorTreeComponent; }
+    UBlackboardComponent* GetBlackBoardComponent() const { return m_blackboardComponent; }
+    void StartBehaviorTree(APawn* pawn);
+    void StopBehaviorTree(APawn* pawn);
+
     virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
     void RotateTowards(const FVector& targetLocation);
     void SetActorLocation(const FVector& targetLocation);
     void AIStateInterrupted();
     void UpdateGroupMembership();
+    UBehaviorTree* GetBehaviorTree() const { return m_aiBehaviorTree; }
 
 private:
+    UPROPERTY(transient)
+        UBehaviorTreeComponent* m_behaviorTreeComponent;
+
+    UPROPERTY(EditAnywhere, category = Behavior)
+        UBehaviorTree* m_aiBehaviorTree;
+
+    UPROPERTY(transient)
+        UBlackboardComponent* m_blackboardComponent;
+
     virtual void GoToBestTarget(float deltaTime) override;
     virtual void UpdatePlayerInteraction(float deltaTime) override;
     virtual void ShowNavigationPath() override;
