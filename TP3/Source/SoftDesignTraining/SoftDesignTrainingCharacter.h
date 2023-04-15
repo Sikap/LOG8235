@@ -21,7 +21,7 @@ public:
 protected:
 
     UPROPERTY(EditAnywhere, category = Behavior)
-        UBehaviorTree* m_aiBehaviorTree;
+    UBehaviorTree* m_aiBehaviorTree;
 
     UFUNCTION()
     virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

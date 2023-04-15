@@ -58,5 +58,5 @@ void ABehaviourTreeAiController::OnPossess(APawn* pawn)
             //Set this agent in the BT
             m_blackboardComponent->SetValue<UBlackboardKeyType_Object>(m_blackboardComponent->GetKeyID("SelfActor"), pawn);
         }
-    }
+    } 
 }

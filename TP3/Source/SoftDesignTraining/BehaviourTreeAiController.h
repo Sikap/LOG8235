@@ -31,6 +31,33 @@ public:
 
 	void                    StartBehaviorTree(APawn* pawn);
 	void                    StopBehaviorTree(APawn* pawn);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+		float m_DetectionCapsuleHalfLength = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+		float m_DetectionCapsuleRadius = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+		float m_DetectionCapsuleForwardStartingOffset = 100.f;
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+		UCurveFloat* JumpCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+		float JumpApexHeight = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+		float JumpSpeed = 1.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+		bool AtJumpSegment = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+		bool InAir = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
+		bool Landing = false;
 
 protected:
 	virtual void OnPossess(APawn* pawn) override;
