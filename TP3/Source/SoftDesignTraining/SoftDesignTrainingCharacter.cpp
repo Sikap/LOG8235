@@ -2,6 +2,7 @@
 
 #include "SoftDesignTrainingCharacter.h"
 #include "SoftDesignTraining.h"
+#include "BehaviourTreeAiController.h"
 #include "SoftDesignTrainingMainCharacter.h"
 #include "SDTAIController.h"
 #include "SDTProjectile.h"
@@ -21,6 +22,11 @@ void ASoftDesignTrainingCharacter::BeginPlay()
 
     GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ASoftDesignTrainingCharacter::OnBeginOverlap);
     m_StartingPosition = GetActorLocation();
+
+    if (ABehaviourTreeAiController* aiController = Cast<ABehaviourTreeAiController>(GetController()))
+    {
+        aiController->StartBehaviorTree(this);
+    }
 }
 
 void ASoftDesignTrainingCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

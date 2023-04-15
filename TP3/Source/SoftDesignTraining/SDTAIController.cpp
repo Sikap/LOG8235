@@ -16,26 +16,7 @@ ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer.SetDefaultSubobjectClass<USDTPathFollowingComponent>(TEXT("PathFollowingComponent")))
 {
     m_PlayerInteractionBehavior = PlayerInteractionBehavior_Collect;
-    m_behaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
-    m_blackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 }
-
-void ASDTAIController::StartBehaviorTree(APawn* pawn)
-{
-    if (GetBehaviorTree() && m_behaviorTreeComponent)
-    {
-        m_behaviorTreeComponent->StartTree(*GetBehaviorTree(), EBTExecutionMode::SingleRun);
-    }
-}
-
-void ASDTAIController::StopBehaviorTree(APawn* pawn)
-{
-    if (GetBehaviorTree())
-    {
-        m_behaviorTreeComponent->StopTree();
-    }
-}
-
 
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
