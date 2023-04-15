@@ -1,5 +1,8 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "GameFramework/Character.h"
 #include "SDTAIController.h"
 
 class SOFTDESIGNTRAINING_API AAiAgentGroupManager 
@@ -16,12 +19,11 @@ public:
 	bool RegisterAIAgent(ASDTAIController* aiAgent);
 	bool UnregisterAIAgent(ASDTAIController* aiAgent);
 	
-	void AssignGroupPositions();
+	void AssignGroupPositions(UWorld* world);
     FVector GetAgentAssignedPosition(ASDTAIController* agent);
 
 public:
 	//SINGLETON
-	AAiAgentGroupManager();
 	static AAiAgentGroupManager* m_Instance;
 
 	TArray<ASDTAIController*> m_registeredAgents;

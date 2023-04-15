@@ -49,11 +49,11 @@ bool AAiAgentGroupManager::UnregisterAIAgent(ASDTAIController* aiAgent){
 }
 
 
-void AAiAgentGroupManager::AssignGroupPositions()
+void AAiAgentGroupManager::AssignGroupPositions(UWorld* world)
 {
     int32 numAgents = m_registeredAgents.Num();
-    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-    if (!playerCharacter || numAgents <= 0) return;
+    ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(world, 0);
+    if (playerCharacter == nullptr || numAgents <= 0) { return;  }
     FVector playerLocation = playerCharacter->GetActorLocation();
 
     float angleIncrement = 360.0f / numAgents;
