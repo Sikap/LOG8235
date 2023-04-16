@@ -7,12 +7,12 @@
 #include "BTTask_IsPlayerDetected.generated.h"
 
 /**
- *
+ * 
  */
 UCLASS()
 class SOFTDESIGNTRAINING_API UBTTask_IsPlayerDetected : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
-		virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 };

@@ -2,6 +2,7 @@
 
 
 #include "BTTask_IsPlayerDetected.h"
+<<<<<<< HEAD
 #include "BehaviourTreeAiController.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include <SoftDesignTraining/SDTUtils.h>
@@ -21,5 +22,4 @@ EBTNodeResult::Type UBTTask_IsPlayerDetected::ExecuteTask(UBehaviorTreeComponent
 
 	}
 	return EBTNodeResult::Failed;
-
 }
