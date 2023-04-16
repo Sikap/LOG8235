@@ -61,6 +61,11 @@ public:
 
 protected:
 	virtual void OnPossess(APawn* pawn) override;
+public:
+	FVector GetBestFleeLocation();
+	uint8 GetFleePosBBKeyID() const { return m_fleePosKeyID; }
+	FHitResult GetHighPriorityDetections();
+
 private:
 
 	UPROPERTY(transient)
@@ -74,5 +79,6 @@ private:
 	uint8   m_isTargetSeenBBKeyID;
 	uint8   m_nextPatrolDestinationBBKeyID;
 	uint8   m_currentPatrolDestinationBBKeyID;
+	uint8	m_fleePosKeyID;
 	
 };
