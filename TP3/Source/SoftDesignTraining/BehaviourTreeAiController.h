@@ -27,7 +27,7 @@ public:
 	uint8					GetFleeLocationBBKeyID() const { return m_fleeLocationKeyID; }
 	uint8                   GetChaseLocationKeyID() const { return m_chaseLocationKeyID; }
 	uint8                   GetCollectibleLocationKeyID() const { return m_collectibleLocationKeyID; }
-	//uint8                   GetCurrentPatrolDestinationKeyID() const { return m_currentPatrolDestinationBBKeyID; }
+	uint8                   GetPlayerDetectedKeyID() const { return m_playerDetectedKeyID; }
 
 	void                    StartBehaviorTree(APawn* pawn);
 	void                    StopBehaviorTree(APawn* pawn);
@@ -81,6 +81,7 @@ private:
 	uint8   m_chaseLocationKeyID;
 	uint8   m_fleeLocationKeyID;
 	uint8   m_collectibleLocationKeyID;
+	uint8   m_playerDetectedKeyID;
 
 	
 };

@@ -9,6 +9,8 @@
 #include "EngineUtils.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include <Kismet/GameplayStatics.h>
 #include <SoftDesignTraining/SDTUtils.h>
 
@@ -16,7 +18,8 @@
 ABehaviourTreeAiController::ABehaviourTreeAiController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<USDTPathFollowingComponent>(TEXT("PathFollowingComponent"))),
     m_chaseLocationKeyID(0),
     m_fleeLocationKeyID(0),
-    m_collectibleLocationKeyID(0)
+    m_collectibleLocationKeyID(0),
+    m_playerDetectedKeyID(0)
    
 {
     m_behaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
@@ -63,11 +66,18 @@ void ABehaviourTreeAiController::OnPossess(APawn* pawn)
             m_chaseLocationKeyID = m_blackboardComponent->GetKeyID("ChaseLocation");
             m_fleeLocationKeyID = m_blackboardComponent->GetKeyID("FleeLocation");
             m_collectibleLocationKeyID = m_blackboardComponent->GetKeyID("CollectibleLocation");
-
+            m_playerDetectedKeyID = m_blackboardComponent->GetKeyID("PlayerDetected");
            
 
             //Set this agent in the BT
             m_blackboardComponent->SetValue<UBlackboardKeyType_Object>(m_blackboardComponent->GetKeyID("SelfActor"), pawn);
+
+            m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(m_chaseLocationKeyID, m_invalidLocation);
+            m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(m_fleeLocationKeyID, m_invalidLocation);
+            m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(m_collectibleLocationKeyID, m_invalidLocation);
+            m_blackboardComponent->SetValue<UBlackboardKeyType_Bool>(m_playerDetectedKeyID, false);
+
+           
         }
     } 
 }

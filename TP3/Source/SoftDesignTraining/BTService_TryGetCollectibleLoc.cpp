@@ -21,7 +21,7 @@ void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), foundCollectibles);
     ABehaviourTreeAiController* aiController = Cast<ABehaviourTreeAiController>(OwnerComp.GetAIOwner());
 
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("len %i"), foundCollectibles.Num()));
+   
     for (int i=0; i < foundCollectibles.Num(); i++)
     {
         //int index = FMath::RandRange(0, foundCollectibles.Num() - 1);
@@ -38,12 +38,10 @@ void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp
 
     if (closestCollectible) {
 
-            aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), closestCollectible->GetActorLocation());
-            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Returning OK!"));
+            aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), closestCollectible->GetActorLocation());  
     }
     else {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), aiController->m_invalidLocation);
-         GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Returning since no before return!"));
     }
      
 }
