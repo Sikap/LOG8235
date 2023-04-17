@@ -2,10 +2,11 @@
 
 
 #include "BTTask_IsPlayerPowerdUp.h"
-
+#include "SDTUtils.h"
 EBTNodeResult::Type UBTTask_IsPlayerPowerdUp::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-
-
+    if (SDTUtils::IsPlayerPoweredUp(GetWorld())) {
+        return EBTNodeResult::Succeeded;
+    }
     return EBTNodeResult::Failed;
 }

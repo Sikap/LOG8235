@@ -2,7 +2,6 @@
 
 
 #include "BTTask_IsPlayerDetected.h"
-<<<<<<< HEAD
 #include "BehaviourTreeAiController.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include <SoftDesignTraining/SDTUtils.h>
@@ -16,8 +15,7 @@ EBTNodeResult::Type UBTTask_IsPlayerDetected::ExecuteTask(UBehaviorTreeComponent
 		if (!result.GetComponent())return EBTNodeResult::Failed;
 		if (result.GetComponent()->GetCollisionObjectType() != COLLISION_PLAYER) return EBTNodeResult::Failed;
 
-		OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>(aiBtController->GetTargetPosBBKeyID(), result.GetActor()->GetActorLocation());
-
+		OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>(aiBtController->GetChaseLocationKeyID(), result.GetActor()->GetActorLocation());
 		return EBTNodeResult::Succeeded;
 
 	}

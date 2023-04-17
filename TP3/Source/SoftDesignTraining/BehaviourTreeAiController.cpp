@@ -5,13 +5,19 @@
 #include "SoftDesignTrainingCharacter.h"
 #include "SDTFleeLocation.h"
 #include "SoftDesignTraining.h"
+#include "SDTPathFollowingComponent.h"
 #include "EngineUtils.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include <Kismet/GameplayStatics.h>
+#include <SoftDesignTraining/SDTUtils.h>
 
-ABehaviourTreeAiController::ABehaviourTreeAiController()
-    : m_targetPosBBKeyID(0),
-    m_isTargetSeenBBKeyID(0)
+
+ABehaviourTreeAiController::ABehaviourTreeAiController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<USDTPathFollowingComponent>(TEXT("PathFollowingComponent"))),
+    m_chaseLocationKeyID(0),
+    m_fleeLocationKeyID(0),
+    m_collectibleLocationKeyID(0)
+   
 {
     m_behaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
     m_blackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
@@ -54,11 +60,11 @@ void ABehaviourTreeAiController::OnPossess(APawn* pawn)
         {
             m_blackboardComponent->InitializeBlackboard(*aiBaseCharacter->GetBehaviorTree()->BlackboardAsset);
 
-            m_targetPosBBKeyID = m_blackboardComponent->GetKeyID("TargetPos");
-            m_isTargetSeenBBKeyID = m_blackboardComponent->GetKeyID("TargetIsSeen");
-            m_nextPatrolDestinationBBKeyID = m_blackboardComponent->GetKeyID("NextPatrolDest");
-            m_currentPatrolDestinationBBKeyID = m_blackboardComponent->GetKeyID("CurrentPatrolDest");
-            m_fleePosKeyID = m_blackboardComponent->GetKeyID("BestFleePos");
+            m_chaseLocationKeyID = m_blackboardComponent->GetKeyID("ChaseLocation");
+            m_fleeLocationKeyID = m_blackboardComponent->GetKeyID("FleeLocation");
+            m_collectibleLocationKeyID = m_blackboardComponent->GetKeyID("CollectibleLocation");
+
+           
 
             //Set this agent in the BT
             m_blackboardComponent->SetValue<UBlackboardKeyType_Object>(m_blackboardComponent->GetKeyID("SelfActor"), pawn);
@@ -103,7 +109,33 @@ FVector ABehaviourTreeAiController::GetBestFleeLocation() {
     return FVector::Zero();
 }
 FHitResult ABehaviourTreeAiController::GetHighPriorityDetections() {
-    // TO DO filtrer les collision pour player
-    FHitResult hitResults;
-    return hitResults;
+
+    FVector detectionStartLocation = GetPawn()->GetActorLocation() + GetPawn()->GetActorForwardVector() * m_DetectionCapsuleForwardStartingOffset;
+    FVector detectionEndLocation = detectionStartLocation + GetPawn()->GetActorForwardVector() * m_DetectionCapsuleHalfLength * 2;
+
+    TArray<TEnumAsByte<EObjectTypeQuery>> detectionTraceObjectTypes;
+    detectionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_PLAYER));
+
+    TArray<FHitResult> allDetectionHits;
+    GetWorld()->SweepMultiByObjectType(allDetectionHits, detectionStartLocation, detectionEndLocation, FQuat::Identity, detectionTraceObjectTypes, FCollisionShape::MakeSphere(m_DetectionCapsuleRadius));
+    
+    FHitResult outDetectionHit;
+
+    for (const FHitResult& hit : allDetectionHits)
+    {
+        if (UPrimitiveComponent* component = hit.GetComponent())
+        {
+            if (component->GetCollisionObjectType() == COLLISION_PLAYER)
+            {
+                //we can't get more important than the player
+                outDetectionHit = hit;
+                return outDetectionHit; 
+            }
+            else if (component->GetCollisionObjectType() == COLLISION_COLLECTIBLE)
+            {
+                outDetectionHit = hit;
+            }
+        }
+    }
+    return outDetectionHit;
 }
