@@ -19,6 +19,9 @@ void UBTService_TryGetChaseLocation::TickNode(UBehaviorTreeComponent& OwnerComp,
     AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
     if (aiAgentGroupManager)
     {
+        aiAgentGroupManager->RegisterAIAgent(aiController);
+        DrawDebugSphere(GetWorld(), aiController->GetPawn()->GetActorLocation() + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Purple);
+        aiAgentGroupManager->AssignGroupPositions(GetWorld());
         FVector assignedPosition = aiAgentGroupManager->GetAgentAssignedPosition(aiController);
         if (!assignedPosition.IsZero()) {
             aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetChaseLocationKeyID(), assignedPosition);

@@ -5,6 +5,7 @@
 #include <SoftDesignTraining/SDTFleeLocation.h>
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "BehaviourTreeAiController.h"
+#include "AiAgentGroupManager.h"
 #include "EngineUtils.h"
 #include <EngineMinimal.h>
 
@@ -51,6 +52,9 @@ void UBTService_TryGetFleeLocation::TickNode(UBehaviorTreeComponent& OwnerComp, 
     //Set this agent in the BT
     if (bestFleeLocation) {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleePosBBKeyID(), bestFleeLocation->GetActorLocation());
+        
+        AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+        aiAgentGroupManager->UnregisterAIAgent(aiController);
     }
     else {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleePosBBKeyID(), aiController->m_invalidLocation);

@@ -6,6 +6,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "BehaviourTreeAiController.h"
+#include "AiAgentGroupManager.h"
 #include "Engine/GameEngine.h"
 
 UBTService_TryGetCollectibleLoc::UBTService_TryGetCollectibleLoc() {
@@ -39,6 +40,8 @@ void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp
     if (closestCollectible) {
 
             aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), closestCollectible->GetActorLocation());  
+            AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+            aiAgentGroupManager->UnregisterAIAgent(aiController);
     }
     else {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), aiController->m_invalidLocation);
