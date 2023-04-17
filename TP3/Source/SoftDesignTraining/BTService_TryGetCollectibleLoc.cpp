@@ -8,6 +8,7 @@
 #include "BehaviourTreeAiController.h"
 #include "AiAgentGroupManager.h"
 #include "Engine/GameEngine.h"
+#include "GenericPlatform/GenericPlatformTime.h"
 
 UBTService_TryGetCollectibleLoc::UBTService_TryGetCollectibleLoc() {
 	bCreateNodeInstance = true;
@@ -15,6 +16,9 @@ UBTService_TryGetCollectibleLoc::UBTService_TryGetCollectibleLoc() {
 
 void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+    const uint32 BroadcastBeginTime = FPlatformTime::Cycles();
+
+
     float closestSqrCollectibleDistance = 18446744073709551610.f;
     AActor* closestCollectible = nullptr;
 
@@ -46,5 +50,8 @@ void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp
     else {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), aiController->m_invalidLocation);
     }
+
+    const uint32 BroadcastEndTime = FPlatformTime::Cycles();
+    aiController->m_CollectibleTime = FPlatformTime::GetSecondsPerCycle() * float(BroadcastEndTime - BroadcastBeginTime);
      
 }

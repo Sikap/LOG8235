@@ -65,6 +65,10 @@ public:
 	FVector GetBestFleeLocation();
 	uint8 GetFleePosBBKeyID() const { return m_fleeLocationKeyID; }
 	FHitResult GetHighPriorityDetections();
+
+
+	void DebugCpuTime();
+
 	UPROPERTY(transient)
 		UBehaviorTreeComponent* m_behaviorTreeComponent;
 	UPROPERTY(transient)
@@ -72,6 +76,16 @@ public:
 
 	FVector m_currentTarget;
 	FVector m_invalidLocation = FVector(0, 0, -9999);
+
+
+
+	float m_FleeTime = 0;
+	float m_DetectionTime = 0;
+	float m_CollectibleTime = 0;
+
+	uint32 m_btCycleStart = 0;
+	uint32 m_btCycleEnd = 0;
+
 private:
 
 

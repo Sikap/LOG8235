@@ -15,6 +15,8 @@ UBTService_TryGetFleeLocation::UBTService_TryGetFleeLocation() {
 
 void UBTService_TryGetFleeLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+    const uint32 BroadcastBeginTime = FPlatformTime::Cycles();
+
     float bestLocationScore = 0.f;
     ASDTFleeLocation* bestFleeLocation = nullptr;
 
@@ -59,5 +61,8 @@ void UBTService_TryGetFleeLocation::TickNode(UBehaviorTreeComponent& OwnerComp, 
     else {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleePosBBKeyID(), aiController->m_invalidLocation);
     }
+
+    const uint32 BroadcastEndTime = FPlatformTime::Cycles();
+    aiController->m_FleeTime = FPlatformTime::GetSecondsPerCycle() * float(BroadcastEndTime - BroadcastBeginTime);
 
 }

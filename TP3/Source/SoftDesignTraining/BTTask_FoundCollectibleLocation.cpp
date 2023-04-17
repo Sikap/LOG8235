@@ -17,7 +17,7 @@ EBTNodeResult::Type UBTTask_FoundCollectibleLocation::ExecuteTask(UBehaviorTreeC
             
             if (targetPosition == aiController->m_invalidLocation)
             {
-                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FAILED")));
+                
                 return EBTNodeResult::Failed;
             }
         }

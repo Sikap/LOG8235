@@ -22,15 +22,19 @@ ABehaviourTreeAiController::ABehaviourTreeAiController(const FObjectInitializer&
     m_playerDetectedKeyID(0)
    
 {
+    UE_LOG(LogTemp, Log, TEXT("AgentCreated"));
     m_behaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
     m_blackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 }
 
 ABehaviourTreeAiController::~ABehaviourTreeAiController()
 {
-
 }
-
+void ABehaviourTreeAiController::DebugCpuTime() {
+    FString agentName = GetPawn()->GetName();
+    float lastTotalTime = float(m_btCycleEnd- m_btCycleStart) * FPlatformTime::GetSecondsPerCycle();
+    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Agent: %s - Last behaviourTree time (total) : %f , LastPlayerDetectionTime: %f LastFleeLocationTime: %f , LastCollectibleTime: %f "), *agentName, lastTotalTime, m_DetectionTime, m_FleeTime, m_CollectibleTime));    
+}
 void ABehaviourTreeAiController::StartBehaviorTree(APawn* pawn)
 {
     if (ASoftDesignTrainingCharacter* aiBaseCharacter = Cast<ASoftDesignTrainingCharacter>(pawn))

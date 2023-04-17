@@ -16,6 +16,11 @@ UBTServiceTryDetectPlayer::UBTServiceTryDetectPlayer() {
 
 void UBTServiceTryDetectPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+	
+
+	const uint32 BroadcastBeginTime = FPlatformTime::Cycles();
+	
+
 	ABehaviourTreeAiController* aiBtController = Cast<ABehaviourTreeAiController>(OwnerComp.GetAIOwner());
 	if (aiBtController)
 	{
@@ -34,7 +39,7 @@ void UBTServiceTryDetectPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 			GetWorld()->LineTraceSingleByObjectType(losHit, aiBtController->GetPawn()->GetActorLocation(), playerCharacter->GetActorLocation(), TraceObjectTypes);
 			if (losHit.GetComponent() && losHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Found And los player")));
+				
 				OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>(aiBtController->GetChaseLocationKeyID(), result.GetActor()->GetActorLocation());
 				OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>(aiBtController->GetPlayerDetectedKeyID(), true);
 				return;
@@ -42,4 +47,8 @@ void UBTServiceTryDetectPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		}
 	}
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>(aiBtController->GetPlayerDetectedKeyID(), false);
+	
+	const uint32 BroadcastEndTime = FPlatformTime::Cycles();
+	aiBtController->m_DetectionTime = FPlatformTime::GetSecondsPerCycle() * float(BroadcastEndTime - BroadcastBeginTime);
+
 }
