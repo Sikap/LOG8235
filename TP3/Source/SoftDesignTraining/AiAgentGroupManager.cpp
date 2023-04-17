@@ -28,7 +28,7 @@ void AAiAgentGroupManager::Destroy()
     m_Instance = nullptr;
 }
 
-bool AAiAgentGroupManager::RegisterAIAgent(ASDTAIController* aiAgent)
+bool AAiAgentGroupManager::RegisterAIAgent(ABehaviourTreeAiController* aiAgent)
 {
     if (!m_registeredAgents.Contains(aiAgent))
     {
@@ -38,7 +38,7 @@ bool AAiAgentGroupManager::RegisterAIAgent(ASDTAIController* aiAgent)
     return false;
 }
 
-bool AAiAgentGroupManager::UnregisterAIAgent(ASDTAIController* aiAgent){
+bool AAiAgentGroupManager::UnregisterAIAgent(ABehaviourTreeAiController* aiAgent){
 
     if (m_registeredAgents.Contains(aiAgent))
     {
@@ -66,7 +66,7 @@ void AAiAgentGroupManager::AssignGroupPositions(UWorld* world)
     }
 }
 
-FVector AAiAgentGroupManager::GetAgentAssignedPosition(ASDTAIController* agent)
+FVector AAiAgentGroupManager::GetAgentAssignedPosition(ABehaviourTreeAiController* agent)
 {
     FVector* assignedPosition = AgentAssignedPositions.Find(agent);
     if (assignedPosition)

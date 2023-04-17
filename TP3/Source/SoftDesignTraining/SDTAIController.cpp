@@ -20,7 +20,7 @@ ASDTAIController::ASDTAIController(const FObjectInitializer& ObjectInitializer)
 
 void ASDTAIController::GoToBestTarget(float deltaTime)
 {
-    AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+   /* AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
     if (aiAgentGroupManager && m_PlayerInteractionBehavior == PlayerInteractionBehavior_Chase)
     {
         ACharacter * playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
@@ -33,7 +33,7 @@ void ASDTAIController::GoToBestTarget(float deltaTime)
             OnMoveToTarget();
             return;
         }
-    }
+    }*/
     switch (m_PlayerInteractionBehavior)
     {
     case PlayerInteractionBehavior_Collect:
@@ -301,7 +301,7 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
 // Handels if the Agent should be part of the group
 void ASDTAIController::UpdateGroupMembership()
 {
-    AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+    /*AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
     if (aiAgentGroupManager)
     {
         if (m_PlayerInteractionBehavior == PlayerInteractionBehavior_Chase)
@@ -313,7 +313,7 @@ void ASDTAIController::UpdateGroupMembership()
         {
             aiAgentGroupManager->UnregisterAIAgent(this);
         }
-    }
+    }*/
 }
 
 bool ASDTAIController::HasLoSOnHit(const FHitResult& hit)

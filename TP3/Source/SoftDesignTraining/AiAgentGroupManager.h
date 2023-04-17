@@ -3,7 +3,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
-#include "SDTAIController.h"
+#include "BehaviourTreeAiController.h"
 
 class SOFTDESIGNTRAINING_API AAiAgentGroupManager 
 {
@@ -16,17 +16,17 @@ public:
 	static AAiAgentGroupManager* GetInstance();
 	static void Destroy();
 
-	bool RegisterAIAgent(ASDTAIController* aiAgent);
-	bool UnregisterAIAgent(ASDTAIController* aiAgent);
+	bool RegisterAIAgent(ABehaviourTreeAiController* aiAgent);
+	bool UnregisterAIAgent(ABehaviourTreeAiController* aiAgent);
 	
 	void AssignGroupPositions(UWorld* world);
-    FVector GetAgentAssignedPosition(ASDTAIController* agent);
+    FVector GetAgentAssignedPosition(ABehaviourTreeAiController* agent);
 
 public:
 	//SINGLETON
 	static AAiAgentGroupManager* m_Instance;
 
-	TArray<ASDTAIController*> m_registeredAgents;
-	TMap<ASDTAIController*, FVector> AgentAssignedPositions;
+	TArray<ABehaviourTreeAiController*> m_registeredAgents;
+	TMap<ABehaviourTreeAiController*, FVector> AgentAssignedPositions;
 };
 
