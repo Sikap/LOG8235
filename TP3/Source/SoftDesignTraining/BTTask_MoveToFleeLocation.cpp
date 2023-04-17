@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTTask_MoveToFleeLocation::ExecuteTask(UBehaviorTreeCompone
             }
             
             aiController->m_currentTarget = targetPosition;
-            UAIBlueprintHelperLibrary::SimpleMoveToLocation(aiController, targetPosition);
+            aiController->MoveToLocation(targetPosition, 0.5f, false, true, true, NULL, false);
             return EBTNodeResult::Succeeded;
             
         }

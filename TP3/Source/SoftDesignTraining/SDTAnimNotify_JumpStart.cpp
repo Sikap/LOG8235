@@ -4,7 +4,7 @@
 #include "SoftDesignTraining.h"
 #include "SDTAIController.h"
 #include "SoftDesignTrainingCharacter.h"
-
+#include "BehaviourTreeAiController.h"
 void USDTAnimNotify_JumpStart::Notify(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
 {
     if (AActor* owner = MeshComp->GetOwner())
@@ -14,6 +14,11 @@ void USDTAnimNotify_JumpStart::Notify(USkeletalMeshComponent * MeshComp, UAnimSe
             if (ASDTAIController* controller = Cast<ASDTAIController>(character->GetController()))
             {
                 controller->InAir = true;
+            }
+
+            if (ABehaviourTreeAiController* controller2 = Cast<ABehaviourTreeAiController>(character->GetController()))
+            {
+                controller2->InAir = true;
             }
         }
     }

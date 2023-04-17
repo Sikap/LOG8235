@@ -5,7 +5,7 @@
 #include "SDTUtils.h"
 #include "SDTAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "BehaviourTreeAiController.h"
 #include "DrawDebugHelpers.h"
 
 USDTPathFollowingComponent::USDTPathFollowingComponent(const FObjectInitializer& ObjectInitializer)
@@ -71,6 +71,46 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
             }
         }
         
+        ABehaviourTreeAiController* controllerBT = Cast<ABehaviourTreeAiController>(GetOwner());
+        if (controllerBT)
+        {
+            if (controllerBT->InAir)
+            {
+                m_JumpProgressRatio += DeltaTime;
+                FVector JumpOffset = FVector(0.f, 0.f, 0.f);
+
+                FVector nextLocation = FMath::Lerp(SegmentStart.Location, CurrentTarget, m_JumpProgressRatio);
+
+                float jumpHeight = controllerBT->JumpCurve->GetFloatValue(m_JumpProgressRatio) * controllerBT->JumpApexHeight;
+                nextLocation += FVector(0.f, 0.f, jumpHeight) + JumpOffset;
+
+                const int32 LastSegmentStartIndex = points.Num() - 2;
+                const bool bNotFollowingLastSegment = (MoveSegmentStartIndex < LastSegmentStartIndex);
+
+                MovementComp->RequestDirectMove((nextLocation - controllerBT->GetPawn()->GetActorLocation()) * controllerBT->JumpSpeed, bNotFollowingLastSegment);
+
+                DrawDebugSphere(GetWorld(), nextLocation, 10.f, 8, FColor::Red, false, 5.f);
+            }
+            else
+            {
+                if (controllerBT->Landing)
+                {
+                    ACharacter* character = Cast<ACharacter>(controllerBT->GetPawn());
+                    if (character)
+                    {
+                        UCharacterMovementComponent* charMoveComp = Cast<UCharacterMovementComponent>(character->GetMovementComponent());
+                        if (charMoveComp)
+                        {
+                            charMoveComp->SetMovementMode(MOVE_Walking);
+                        }
+                    }
+                }
+
+                const int32 LastSegmentStartIndex = points.Num() - 2;
+                const bool bNotFollowingLastSegment = (MoveSegmentStartIndex < LastSegmentStartIndex);
+                MovementComp->RequestDirectMove((CurrentTarget - controllerBT->GetPawn()->GetActorLocation()), bNotFollowingLastSegment);
+            }
+        }
         return;
     }
 
@@ -142,6 +182,26 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 SegmentStartIndex)
                 }
             }
         }
+        
+        ABehaviourTreeAiController* controllerBt = Cast<ABehaviourTreeAiController>(GetOwner());
+        if (controllerBt)
+        {
+            ACharacter* character = Cast<ACharacter>(controllerBt->GetPawn());
+            if (character)
+            {
+                UCharacterMovementComponent* charMoveComp = Cast<UCharacterMovementComponent>(character->GetMovementComponent());
+                if (charMoveComp)
+                {
+                    controllerBt->GetPawn()->bUseControllerRotationYaw = true;
+                    controllerBt->AtJumpSegment = true;
+
+                    MovementComp->StopMovementKeepPathing();
+
+                    charMoveComp->bOrientRotationToMovement = false;
+                    charMoveComp->SetMovementMode(MOVE_Flying);
+                }
+            }
+        }
     }
     else
     {
@@ -157,6 +217,25 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 SegmentStartIndex)
                     controller->GetPawn()->bUseControllerRotationYaw = false;
                     controller->AtJumpSegment = false;
                     controller->Landing = false;
+
+                    charMoveComp->bOrientRotationToMovement = true;
+                    charMoveComp->SetMovementMode(MOVE_Walking);
+                }
+            }
+        }
+
+        ABehaviourTreeAiController* controllerBt = Cast<ABehaviourTreeAiController>(GetOwner());
+        if (controllerBt)
+        {
+            ACharacter* character = Cast<ACharacter>(controllerBt->GetPawn());
+            if (character)
+            {
+                UCharacterMovementComponent* charMoveComp = Cast<UCharacterMovementComponent>(character->GetMovementComponent());
+                if (charMoveComp)
+                {
+                    controllerBt->GetPawn()->bUseControllerRotationYaw = false;
+                    controllerBt->AtJumpSegment = false;
+                    controllerBt->Landing = false;
 
                     charMoveComp->bOrientRotationToMovement = true;
                     charMoveComp->SetMovementMode(MOVE_Walking);

@@ -23,7 +23,8 @@ EBTNodeResult::Type UBTTask_MoveToCollectibleLocation::ExecuteTask(UBehaviorTree
 
             if (targetPosition != aiController->m_currentTarget) {
                 aiController->m_currentTarget = targetPosition;
-                UAIBlueprintHelperLibrary::SimpleMoveToLocation(aiController, targetPosition);
+               // UAIBlueprintHelperLibrary::SimpleMoveToLocation(aiController, targetPosition);
+                aiController->MoveToLocation(targetPosition, 0.5f, false, true, true, NULL, false);
                 return EBTNodeResult::Succeeded;
             }
            
