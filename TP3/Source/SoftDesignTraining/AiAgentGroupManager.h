@@ -17,6 +17,7 @@ public:
 	static void Destroy();
 
 	bool RegisterAIAgent(ABehaviourTreeAiController* aiAgent);
+	bool HasAIAgent(ABehaviourTreeAiController* aiAgent);
 	bool UnregisterAIAgent(ABehaviourTreeAiController* aiAgent);
 	
 	void AssignGroupPositions(UWorld* world);

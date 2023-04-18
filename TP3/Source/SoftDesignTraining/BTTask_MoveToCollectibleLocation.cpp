@@ -13,6 +13,9 @@ EBTNodeResult::Type UBTTask_MoveToCollectibleLocation::ExecuteTask(UBehaviorTree
     {
         if (ABehaviourTreeAiController* aiController = Cast<ABehaviourTreeAiController>(OwnerComp.GetAIOwner()))
         {
+            aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetChaseLocationKeyID(), aiController->m_invalidLocation);
+            aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleeLocationBBKeyID(), aiController->m_invalidLocation);
+
             FVector targetPosition = MyBlackboard->GetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID());
             float dist = targetPosition.Dist(targetPosition, aiController->GetPawn()->GetActorLocation());
             if (targetPosition == aiController->m_currentTarget )

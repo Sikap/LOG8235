@@ -7,7 +7,7 @@
 
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
-
+#include "AgentTimeLogger.h"
 #include "BehaviourTreeAiController.generated.h"
 
 /**
@@ -63,7 +63,7 @@ protected:
 	virtual void OnPossess(APawn* pawn) override;
 public:
 	FVector GetBestFleeLocation();
-	uint8 GetFleePosBBKeyID() const { return m_fleeLocationKeyID; }
+	
 	FHitResult GetHighPriorityDetections();
 
 
@@ -77,7 +77,7 @@ public:
 	FVector m_currentTarget;
 	FVector m_invalidLocation = FVector(0, 0, -9999);
 
-
+	int m_debugKey = -1;
 
 	float m_FleeTime = 0;
 	float m_DetectionTime = 0;
@@ -86,11 +86,12 @@ public:
 	uint32 m_btCycleStart = 0;
 	uint32 m_btCycleEnd = 0;
 
+	AAgentTimeLogger* m_loggerRef = nullptr;
 private:
 
 
 
-
+	virtual void Tick(float deltaTime) override;
 
 	uint8   m_chaseLocationKeyID;
 	uint8   m_fleeLocationKeyID;

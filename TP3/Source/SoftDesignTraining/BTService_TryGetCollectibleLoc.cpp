@@ -16,6 +16,14 @@ UBTService_TryGetCollectibleLoc::UBTService_TryGetCollectibleLoc() {
 
 void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+
+    ABehaviourTreeAiController* aiController = Cast<ABehaviourTreeAiController>(OwnerComp.GetAIOwner());
+    if (aiController->m_blackboardComponent->GetValue<UBlackboardKeyType_Vector>(aiController->GetFleeLocationBBKeyID()) == aiController->m_currentTarget &&
+        FVector::Dist(aiController->m_currentTarget, aiController->GetPawn()->GetActorLocation()) > 150) {
+        return;
+    }
+
+
     const uint32 BroadcastBeginTime = FPlatformTime::Cycles();
 
 
@@ -24,7 +32,7 @@ void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp
 
     TArray<AActor*> foundCollectibles;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDTCollectible::StaticClass(), foundCollectibles);
-    ABehaviourTreeAiController* aiController = Cast<ABehaviourTreeAiController>(OwnerComp.GetAIOwner());
+   
 
    
     for (int i=0; i < foundCollectibles.Num(); i++)
@@ -43,9 +51,9 @@ void UBTService_TryGetCollectibleLoc::TickNode(UBehaviorTreeComponent& OwnerComp
 
     if (closestCollectible) {
 
-            aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), closestCollectible->GetActorLocation());  
-            AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
-            aiAgentGroupManager->UnregisterAIAgent(aiController);
+        aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), closestCollectible->GetActorLocation());  
+        AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+        aiAgentGroupManager->UnregisterAIAgent(aiController);
     }
     else {
         aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetCollectibleLocationKeyID(), aiController->m_invalidLocation);

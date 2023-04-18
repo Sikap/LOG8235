@@ -38,6 +38,11 @@ bool AAiAgentGroupManager::RegisterAIAgent(ABehaviourTreeAiController* aiAgent)
     return false;
 }
 
+bool AAiAgentGroupManager::HasAIAgent(ABehaviourTreeAiController* aiAgent) {
+
+   return m_registeredAgents.Contains(aiAgent);
+}
+
 bool AAiAgentGroupManager::UnregisterAIAgent(ABehaviourTreeAiController* aiAgent){
 
     if (m_registeredAgents.Contains(aiAgent))

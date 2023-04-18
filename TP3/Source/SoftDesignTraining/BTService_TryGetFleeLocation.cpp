@@ -53,13 +53,13 @@ void UBTService_TryGetFleeLocation::TickNode(UBehaviorTreeComponent& OwnerComp, 
     }
     //Set this agent in the BT
     if (bestFleeLocation) {
-        aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleePosBBKeyID(), bestFleeLocation->GetActorLocation());
+        aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleeLocationBBKeyID(), bestFleeLocation->GetActorLocation());
         
         AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
         aiAgentGroupManager->UnregisterAIAgent(aiController);
     }
     else {
-        aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleePosBBKeyID(), aiController->m_invalidLocation);
+        aiController->m_blackboardComponent->SetValue<UBlackboardKeyType_Vector>(aiController->GetFleeLocationBBKeyID(), aiController->m_invalidLocation);
     }
 
     const uint32 BroadcastEndTime = FPlatformTime::Cycles();

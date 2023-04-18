@@ -2,6 +2,7 @@
 
 
 #include "BTTask_MoveToLKPLocation.h"
+#include "AiAgentGroupManager.h"
 #include "BehaviourTreeAiController.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
@@ -16,8 +17,19 @@ EBTNodeResult::Type UBTTask_MoveToLKPLocation::ExecuteTask(UBehaviorTreeComponen
             FVector targetPosition = MyBlackboard->GetValue<UBlackboardKeyType_Vector>(aiController->GetChaseLocationKeyID());
             if (targetPosition == aiController->m_currentTarget)
             {
+                if (FVector::Dist(targetPosition, aiController->GetPawn()->GetActorLocation()) < 30) {
+                    
+                    AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+                    aiAgentGroupManager->UnregisterAIAgent(aiController);
+                    
+                    return EBTNodeResult::Failed;
+
+                }
                 return EBTNodeResult::Succeeded;
             }
+
+
+           
 
             aiController->m_currentTarget = targetPosition;
             aiController->MoveToLocation(targetPosition, 0.5f, false, true, true, NULL, false);

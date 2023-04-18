@@ -12,6 +12,8 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include <Kismet/GameplayStatics.h>
+#include "AiAgentGroupManager.h"
+
 #include <SoftDesignTraining/SDTUtils.h>
 
 
@@ -33,7 +35,15 @@ ABehaviourTreeAiController::~ABehaviourTreeAiController()
 void ABehaviourTreeAiController::DebugCpuTime() {
     FString agentName = GetPawn()->GetName();
     float lastTotalTime = float(m_btCycleEnd- m_btCycleStart) * FPlatformTime::GetSecondsPerCycle();
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Agent: %s - Last behaviourTree time (total) : %f , LastPlayerDetectionTime: %f LastFleeLocationTime: %f , LastCollectibleTime: %f "), *agentName, lastTotalTime, m_DetectionTime, m_FleeTime, m_CollectibleTime));    
+    if (m_loggerRef) {
+
+        if(m_debugKey < 10)
+            m_loggerRef->AgentMap.Add(m_debugKey, FString::Printf(TEXT("  %i            |           %f          |           %f                       |            %f                   |           %f                |") , m_debugKey, lastTotalTime, m_DetectionTime, m_FleeTime, m_CollectibleTime));
+        else
+            m_loggerRef->AgentMap.Add(m_debugKey, FString::Printf(TEXT("%i            |           %f          |           %f                       |            %f                   |           %f                |"), m_debugKey, lastTotalTime, m_DetectionTime, m_FleeTime, m_CollectibleTime));
+    }
+    
+    //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Agent: %s - Last behaviourTree time (total) : %f , LastPlayerDetectionTime: %f LastFleeLocationTime: %f , LastCollectibleTime: %f "), *agentName, lastTotalTime, m_DetectionTime, m_FleeTime, m_CollectibleTime));    
 }
 void ABehaviourTreeAiController::StartBehaviorTree(APawn* pawn)
 {
@@ -44,6 +54,18 @@ void ABehaviourTreeAiController::StartBehaviorTree(APawn* pawn)
             m_behaviorTreeComponent->StartTree(*aiBaseCharacter->GetBehaviorTree());
         }
     }
+}
+
+void ABehaviourTreeAiController::Tick(float deltaTime)
+{
+    Super::Tick(deltaTime);
+    AAiAgentGroupManager* aiAgentGroupManager = AAiAgentGroupManager::GetInstance();
+   
+    if (aiAgentGroupManager->HasAIAgent(this)) {
+  
+        DrawDebugSphere(GetWorld(), GetPawn()->GetActorLocation() + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Purple);
+    }
+   
 }
 
 void ABehaviourTreeAiController::StopBehaviorTree(APawn* pawn)

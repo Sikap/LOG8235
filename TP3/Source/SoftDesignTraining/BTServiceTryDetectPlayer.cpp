@@ -24,12 +24,17 @@ void UBTServiceTryDetectPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	ABehaviourTreeAiController* aiBtController = Cast<ABehaviourTreeAiController>(OwnerComp.GetAIOwner());
 	if (aiBtController)
 	{
+		OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>(aiBtController->GetPlayerDetectedKeyID(), false);
+
 		FHitResult result = aiBtController->GetHighPriorityDetections();
 		if (result.GetComponent() && result.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
 		{
 			ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-			if (!playerCharacter)
+			if (!playerCharacter) {
+				const uint32 BroadcastEndTime = FPlatformTime::Cycles();
+				aiBtController->m_DetectionTime = FPlatformTime::GetSecondsPerCycle() * float(BroadcastEndTime - BroadcastBeginTime);
 				return;
+			}
 
 			TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes;
 			TraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
@@ -39,14 +44,12 @@ void UBTServiceTryDetectPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 			GetWorld()->LineTraceSingleByObjectType(losHit, aiBtController->GetPawn()->GetActorLocation(), playerCharacter->GetActorLocation(), TraceObjectTypes);
 			if (losHit.GetComponent() && losHit.GetComponent()->GetCollisionObjectType() == COLLISION_PLAYER)
 			{
-				
-				OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>(aiBtController->GetChaseLocationKeyID(), result.GetActor()->GetActorLocation());
+				OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>(aiBtController->GetChaseLocationKeyID(), playerCharacter->GetActorLocation());
 				OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>(aiBtController->GetPlayerDetectedKeyID(), true);
-				return;
 			}
 		}
 	}
-	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>(aiBtController->GetPlayerDetectedKeyID(), false);
+	
 	
 	const uint32 BroadcastEndTime = FPlatformTime::Cycles();
 	aiBtController->m_DetectionTime = FPlatformTime::GetSecondsPerCycle() * float(BroadcastEndTime - BroadcastBeginTime);
